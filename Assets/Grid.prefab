@@ -51,9 +51,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4401efe86e0cc244a1d802f0db3c9f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  backgroundPrefab: {fileID: 1932091330754978, guid: acec0ff962f6b4c42af17c38902f9736,
+  piecePrefabs:
+  - type: 0
+    prefab: {fileID: 1121557178396556, guid: 971efcd3d46c58546a22d56f9fd4618d, type: 2}
+  backgroundPrefab: {fileID: 1385261346022074, guid: 1e12d94a39c86cf40b51b62fb22b4d85,
     type: 2}
-  totalRows: 9
-  collumnHeight: 6
-  angIncrease: 23.1
-  distBetweenRows: 0.7
+  totalRows: 10
+  collumnHeight: 5
+  angIncrease: 15
+  distBetweenRows: 0.9
