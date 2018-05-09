@@ -19,6 +19,8 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4507443711890506}
+  - component: {fileID: 114550915717757578}
+  - component: {fileID: 114659793088381676}
   m_Layer: 0
   m_Name: Fish 1
   m_TagString: Untagged
@@ -69,6 +71,28 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &114550915717757578
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1121557178396556}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d925324d67fc53d4f8494dc37df437fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &114659793088381676
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1121557178396556}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff132326806ad8e40b00ecdb8b282c38, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!212 &212511643267107118
 SpriteRenderer:
   m_ObjectHideFlags: 1

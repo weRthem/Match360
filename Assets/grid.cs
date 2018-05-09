@@ -22,16 +22,20 @@ public class grid : MonoBehaviour { //3D MATCH 3
 	[SerializeField] int collumnHeight = 9;
 	[SerializeField] int angIncrease = 5; //that ammount the angle from the center increases with each new block
 	[SerializeField] float distBetweenRows = 1f; //how much higher the next block will be placed
+	[SerializeField] float radius = 3.0f;
 
 	private Dictionary<PieceType, GameObject> piecePrefabDict;
 
-	private GameObject[,] pieces;
+	private GamePiece[,] pieces;
 
 	int ang = 0;
+
+	Vector3 center; //the grids center
 
 	// Use this for initialization
 	void Start ()
 	{
+		center = transform.position; //the grids center
 		PlaceGrid();
 		piecePrefabDict = new Dictionary<PieceType, GameObject>();
 
@@ -41,16 +45,27 @@ public class grid : MonoBehaviour { //3D MATCH 3
 			}
 		}
 
-		Vector3 center = transform.position; //the grids center
-		pieces = new GameObject[totalRows, collumnHeight];
+		PlacePieces();
+	}
+
+	private void PlacePieces()
+	{
+		pieces = new GamePiece[totalRows, collumnHeight];
 		ang = 0;
 		for (int x = 0; x < totalRows; x++) {
-			Vector3 pos = GridCirlcle(center, 3.0f);
+			Vector3 pos = GridCirlcle();
 			Quaternion rot = Quaternion.FromToRotation(Vector3.forward, center - pos);
 			for (int y = 0; y < collumnHeight; y++) {
-				pieces[x, y] = (GameObject)Instantiate(piecePrefabDict[PieceType.NORMAL], pos, rot);
-				pieces[x, y].name = "Piece(" + x + "," + y + ")";
-				pieces[x, y].transform.parent = transform;
+				GameObject newPiece = (GameObject)Instantiate(piecePrefabDict[PieceType.NORMAL], pos, rot);
+				newPiece.name = "Piece(" + x + "," + y + ")";
+				newPiece.transform.parent = transform;
+
+				pieces[x, y] = newPiece.GetComponent<GamePiece>();
+				pieces[x, y].Init(pos.x, pos.y, pos.z, this, PieceType.NORMAL);
+
+				if (pieces[x, y].IsMovable()) {
+					pieces[x, y].MovableComponent.Move(pos.x, pos.y, pos.z);
+				}
 				pos.y += distBetweenRows;
 			}
 		}
@@ -60,7 +75,7 @@ public class grid : MonoBehaviour { //3D MATCH 3
 		ang = 0;
 		Vector3 center = transform.position; //the grids center
 		for (int x = 0; x < totalRows; x++) {
-			Vector3 pos = GridCirlcle(center, 3.0f);
+			Vector3 pos = GridCirlcle();
 			Quaternion rot = Quaternion.FromToRotation(Vector3.forward, center - pos); //Faces the tiles toward the center
 			for (int y = 0; y < collumnHeight; y++) {
 				//creates a tile and childs it to the grid
@@ -71,7 +86,7 @@ public class grid : MonoBehaviour { //3D MATCH 3
 		}
 	}
 
-	Vector3 GridCirlcle(Vector3 center, float radius) {
+	public Vector3 GridCirlcle() {
 		Vector3 pos;
 		ang += angIncrease;
 		pos.x = center.x + radius * Mathf.Sin(ang * Mathf.Deg2Rad);
