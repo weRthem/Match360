@@ -66,6 +66,11 @@ public class grid : MonoBehaviour { //3D MATCH 3
 				if (pieces[x, y].IsMovable()) {
 					pieces[x, y].MovableComponent.Move(pos.x, pos.y, pos.z);
 				}
+
+				if (pieces[x, y].IsColored()) {
+					pieces[x, y].ColorComponent.SetColor((ColorPiece.ColorType)Random.Range(0, pieces[x, y].ColorComponent.NumColor));
+				}
+
 				pos.y += distBetweenRows;
 			}
 		}
