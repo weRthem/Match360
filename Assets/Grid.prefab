@@ -58,8 +58,8 @@ MonoBehaviour:
     prefab: {fileID: 1121557178396556, guid: 971efcd3d46c58546a22d56f9fd4618d, type: 2}
   backgroundPrefab: {fileID: 1385261346022074, guid: 1e12d94a39c86cf40b51b62fb22b4d85,
     type: 2}
-  totalRows: 10
+  totalRows: 21
   collumnHeight: 5
-  angIncrease: 15
+  angIncrease: 17
   distBetweenRows: 0.9
   radius: 3
