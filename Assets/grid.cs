@@ -5,6 +5,7 @@ using UnityEngine;
 public class grid : MonoBehaviour { //3D MATCH 3
 
 	public enum PieceType{
+		EMPTY,
 		NORMAL,
 		COUNT, //this is just to make looping easier. no more -1
 	};
@@ -56,21 +57,7 @@ public class grid : MonoBehaviour { //3D MATCH 3
 			Vector3 pos = GridCirlcle();
 			Quaternion rot = Quaternion.FromToRotation(Vector3.forward, center - pos);
 			for (int y = 0; y < collumnHeight; y++) {
-				GameObject newPiece = (GameObject)Instantiate(piecePrefabDict[PieceType.NORMAL], pos, rot);
-				newPiece.name = "Piece(" + x + "," + y + ")";
-				newPiece.transform.parent = transform;
-
-				pieces[x, y] = newPiece.GetComponent<GamePiece>();
-				pieces[x, y].Init(pos.x, pos.y, pos.z, this, PieceType.NORMAL);
-
-				if (pieces[x, y].IsMovable()) {
-					pieces[x, y].MovableComponent.Move(pos.x, pos.y, pos.z);
-				}
-
-				if (pieces[x, y].IsColored()) {
-					pieces[x, y].ColorComponent.SetColor((ColorPiece.ColorType)Random.Range(0, pieces[x, y].ColorComponent.NumColor));
-				}
-
+				SpawnNewPiece(x, y, pos, rot, PieceType.EMPTY);
 				pos.y += distBetweenRows;
 			}
 		}
@@ -104,5 +91,15 @@ public class grid : MonoBehaviour { //3D MATCH 3
 	// Update is called once per frame
 	void Update () {
 		
+	}
+
+	public GamePiece SpawnNewPiece(int x, int y, Vector3 pos, Quaternion rot, PieceType type) {
+		GameObject newPiece = (GameObject)Instantiate(piecePrefabDict[type], pos, rot);
+		newPiece.transform.parent = transform;
+
+		pieces[x, y] = newPiece.GetComponent<GamePiece>();
+		pieces[x, y].Init(pos.x, pos.y, pos.z, this, type);
+
+		return pieces[x, y];
 	}
 }
