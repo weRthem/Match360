@@ -5,39 +5,29 @@ using UnityEngine;
 public class GamePiece : MonoBehaviour
 {
 
-	private float x;
-	private float y;
-	private float z;
+	private Vector3 pos;
+	private Quaternion rot;
 
-	public float X
+	public Vector3 Pos //allows other scripts to access the pieces location
 	{
-		get { return x; }
+		get { return pos; }
 		set {
 			if (IsMovable()) {
-				x = value;
+				pos = value;
 			}
 		}
 	}
 
-	public float Y
+	public Quaternion Rot //allows other scripts to access the pieces Rotation
 	{
-		get { return y; }
+		get { return rot; }
 		set {
 			if (IsMovable()) {
-				y = value;
+				rot = value;
 			}
 		}
 	}
 
-	public float Z
-	{
-		get { return z; }
-		set {
-			if (IsMovable()) {
-				z = value;
-			}
-		}
-	}
 
 	private grid.PieceType type;
 
@@ -85,10 +75,9 @@ public class GamePiece : MonoBehaviour
 
 	}
 
-	public void Init(float _x, float _y, float _z, grid _grid, grid.PieceType _type){
-		x = _x;
-		y = _y;
-		z = _z;
+	public void Init(Vector3 _pos, Quaternion _rot, grid _grid, grid.PieceType _type){ //Sets the pieces location
+		pos = _pos;
+		rot = _rot; 
 		Grid = _grid;
 		type = _type;
 	}

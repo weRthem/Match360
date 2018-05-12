@@ -98,7 +98,7 @@ public class grid : MonoBehaviour { //3D MATCH 3
 		newPiece.transform.parent = transform;
 
 		pieces[x, y] = newPiece.GetComponent<GamePiece>();
-		pieces[x, y].Init(pos.x, pos.y, pos.z, this, type);
+		pieces[x, y].Init(pos, rot, this, type);
 
 		return pieces[x, y];
 	}

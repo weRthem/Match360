@@ -152,21 +152,6 @@ Prefab:
       propertyPath: m_RootOrder
       value: 2
       objectReference: {fileID: 0}
-    - target: {fileID: 114982528998296366, guid: 0b5fd8bc42ad0314c86d3dbf06d0ed08,
-        type: 2}
-      propertyPath: totalRows
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 114982528998296366, guid: 0b5fd8bc42ad0314c86d3dbf06d0ed08,
-        type: 2}
-      propertyPath: collumnHeight
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 114982528998296366, guid: 0b5fd8bc42ad0314c86d3dbf06d0ed08,
-        type: 2}
-      propertyPath: angIncrease
-      value: 30
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 0b5fd8bc42ad0314c86d3dbf06d0ed08, type: 2}
   m_IsPrefabParent: 0

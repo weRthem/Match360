@@ -24,13 +24,11 @@ public class MovablePieces : MonoBehaviour
 
 	}
 
-	public void Move(float newX, float newY, float newZ){
-		piece.X = newX;
-		piece.Y = newY;
-		piece.Z = newZ;
-		Vector3 pos = new Vector3(newX, newY, newZ);
+	public void Move(Vector3 newPos, Quaternion newRot){
+		piece.Pos = newPos;
+		piece.Rot = newRot;
 
-		piece.transform.localPosition = pos;
+		piece.transform.localPosition = newPos;
 	}
 }
 
