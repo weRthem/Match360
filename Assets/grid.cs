@@ -47,6 +47,7 @@ public class grid : MonoBehaviour { //3D MATCH 3
 		}
 
 		PlacePieces();
+		Fill();
 	}
 
 	private void PlacePieces()
@@ -90,7 +91,59 @@ public class grid : MonoBehaviour { //3D MATCH 3
 
 	// Update is called once per frame
 	void Update () {
-		
+
+	}
+
+	void Fill() {
+		while (FillStep()) { }
+	}
+
+	public bool FillStep()
+	{
+		bool movedPiece = false;
+
+		for (int y = collumnHeight - 2; y >= 0; y--) {
+			for (int x = 0; x < totalRows; x++) {
+				GamePiece piece = pieces[x, y];
+				//Stores the above pieces original pos and rot
+				Vector3 piecePos = piece.Pos;
+				Quaternion pieceRot = piece.Rot;
+
+				if (piece.IsMovable()) {
+					GamePiece pieceBelow = pieces[x, y + 1];
+					//Stored the lower pieces pos and rot
+					Vector3 pieceBelowPos = pieceBelow.Pos;
+					Quaternion pieceBelowRot = pieceBelow.Rot;
+
+					if (pieceBelow.Type == PieceType.EMPTY) {
+						piece.MovableComponent.Move(pieceBelowPos, pieceBelowRot);
+						pieces[x, y + 1] = piece;
+						SpawnNewPiece(x, y, piecePos, pieceRot, PieceType.EMPTY);
+						movedPiece = true;
+					}
+				}
+			}
+		}
+
+		for (int x = 0; x < totalRows; x++) {
+			GamePiece pieceBelow = pieces[x, 0];
+			Vector3 pieceBelowPos = pieceBelow.Pos;
+			pieceBelowPos.y -= 1;
+
+			if (pieceBelow.Type == PieceType.EMPTY) {
+				GameObject newPiece = (GameObject)Instantiate(piecePrefabDict[PieceType.NORMAL], pieceBelowPos, pieceBelow.Rot);
+				newPiece.transform.parent = transform;
+
+				pieces[x, 0] = newPiece.GetComponent<GamePiece>();
+				pieces[x, 0].Init(pieceBelowPos, pieceBelow.Rot, this, PieceType.NORMAL);
+				pieces[x, 0].MovableComponent.Move(pieceBelow.Pos, pieceBelow.Rot);
+				pieces[x, 0].ColorComponent.SetColor((ColorPiece.ColorType)Random.Range(0, pieces[x, 0].ColorComponent.NumColor));
+				movedPiece = true;
+			}
+		}
+
+
+		return movedPiece;
 	}
 
 	public GamePiece SpawnNewPiece(int x, int y, Vector3 pos, Quaternion rot, PieceType type) {
