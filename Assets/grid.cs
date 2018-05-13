@@ -24,6 +24,7 @@ public class grid : MonoBehaviour { //3D MATCH 3
 	[SerializeField] int angIncrease = 5; //that ammount the angle from the center increases with each new block
 	[SerializeField] float distBetweenRows = 1f; //how much higher the next block will be placed
 	[SerializeField] float radius = 3.0f;
+	[SerializeField] float fillTime = 0.1f;
 
 	private Dictionary<PieceType, GameObject> piecePrefabDict;
 
@@ -47,7 +48,7 @@ public class grid : MonoBehaviour { //3D MATCH 3
 		}
 
 		PlacePieces();
-		Fill();
+		StartCoroutine(Fill());
 	}
 
 	private void PlacePieces()
@@ -94,12 +95,13 @@ public class grid : MonoBehaviour { //3D MATCH 3
 
 	}
 
-	void Fill() {
-		while (FillStep()) { }
+	public IEnumerator Fill(){
+		while (FillStep()) {
+			yield return new WaitForSeconds(fillTime);
+		}
 	}
 
-	public bool FillStep()
-	{
+	public bool FillStep(){ //TODO invert the fill so it fills from the top and not the bottom
 		bool movedPiece = false;
 
 		for (int y = collumnHeight - 2; y >= 0; y--) {
@@ -111,12 +113,10 @@ public class grid : MonoBehaviour { //3D MATCH 3
 
 				if (piece.IsMovable()) {
 					GamePiece pieceBelow = pieces[x, y + 1];
-					//Stored the lower pieces pos and rot
-					Vector3 pieceBelowPos = pieceBelow.Pos;
-					Quaternion pieceBelowRot = pieceBelow.Rot;
 
 					if (pieceBelow.Type == PieceType.EMPTY) {
-						piece.MovableComponent.Move(pieceBelowPos, pieceBelowRot);
+						DestroyImmediate(pieceBelow.gameObject);
+						piece.MovableComponent.Move(pieceBelow.Pos, pieceBelow.Rot, fillTime);
 						pieces[x, y + 1] = piece;
 						SpawnNewPiece(x, y, piecePos, pieceRot, PieceType.EMPTY);
 						movedPiece = true;
@@ -136,7 +136,7 @@ public class grid : MonoBehaviour { //3D MATCH 3
 
 				pieces[x, 0] = newPiece.GetComponent<GamePiece>();
 				pieces[x, 0].Init(pieceBelowPos, pieceBelow.Rot, this, PieceType.NORMAL);
-				pieces[x, 0].MovableComponent.Move(pieceBelow.Pos, pieceBelow.Rot);
+				pieces[x, 0].MovableComponent.Move(pieceBelow.Pos, pieceBelow.Rot, fillTime);
 				pieces[x, 0].ColorComponent.SetColor((ColorPiece.ColorType)Random.Range(0, pieces[x, 0].ColorComponent.NumColor));
 				movedPiece = true;
 			}
@@ -149,7 +149,6 @@ public class grid : MonoBehaviour { //3D MATCH 3
 	public GamePiece SpawnNewPiece(int x, int y, Vector3 pos, Quaternion rot, PieceType type) {
 		GameObject newPiece = (GameObject)Instantiate(piecePrefabDict[type], pos, rot);
 		newPiece.transform.parent = transform;
-
 		pieces[x, y] = newPiece.GetComponent<GamePiece>();
 		pieces[x, y].Init(pos, rot, this, type);
 
