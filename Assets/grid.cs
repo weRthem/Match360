@@ -104,7 +104,7 @@ public class grid : MonoBehaviour { //3D MATCH 3
 	public bool FillStep(){ //TODO invert the fill so it fills from the top and not the bottom
 		bool movedPiece = false;
 
-		for (int y = collumnHeight - 2; y >= 0; y--) {
+		for (int y = collumnHeight - 1; y >= 1; y--) {
 			for (int x = 0; x < totalRows; x++) {
 				GamePiece piece = pieces[x, y];
 				//Stores the above pieces original pos and rot
@@ -112,12 +112,12 @@ public class grid : MonoBehaviour { //3D MATCH 3
 				Quaternion pieceRot = piece.Rot;
 
 				if (piece.IsMovable()) {
-					GamePiece pieceBelow = pieces[x, y + 1];
+					GamePiece pieceBelow = pieces[x, y - 1];
 
 					if (pieceBelow.Type == PieceType.EMPTY) {
-						DestroyImmediate(pieceBelow.gameObject);
+						Destroy(pieceBelow.gameObject);
 						piece.MovableComponent.Move(pieceBelow.Pos, pieceBelow.Rot, fillTime);
-						pieces[x, y + 1] = piece;
+						pieces[x, y - 1] = piece;
 						SpawnNewPiece(x, y, piecePos, pieceRot, PieceType.EMPTY);
 						movedPiece = true;
 					}
@@ -126,18 +126,19 @@ public class grid : MonoBehaviour { //3D MATCH 3
 		}
 
 		for (int x = 0; x < totalRows; x++) {
-			GamePiece pieceBelow = pieces[x, 0];
+			GamePiece pieceBelow = pieces[x, collumnHeight - 1];
 			Vector3 pieceBelowPos = pieceBelow.Pos;
-			pieceBelowPos.y -= 1;
+			pieceBelowPos.y += 1;
 
 			if (pieceBelow.Type == PieceType.EMPTY) {
 				GameObject newPiece = (GameObject)Instantiate(piecePrefabDict[PieceType.NORMAL], pieceBelowPos, pieceBelow.Rot);
 				newPiece.transform.parent = transform;
 
-				pieces[x, 0] = newPiece.GetComponent<GamePiece>();
-				pieces[x, 0].Init(pieceBelowPos, pieceBelow.Rot, this, PieceType.NORMAL);
-				pieces[x, 0].MovableComponent.Move(pieceBelow.Pos, pieceBelow.Rot, fillTime);
-				pieces[x, 0].ColorComponent.SetColor((ColorPiece.ColorType)Random.Range(0, pieces[x, 0].ColorComponent.NumColor));
+				pieces[x, collumnHeight - 1] = newPiece.GetComponent<GamePiece>();
+				pieces[x, collumnHeight - 1].Init(pieceBelowPos, pieceBelow.Rot, this, PieceType.NORMAL);
+				pieces[x, collumnHeight - 1].MovableComponent.Move(pieceBelow.Pos, pieceBelow.Rot, fillTime);
+				pieces[x, collumnHeight - 1].ColorComponent.SetColor((ColorPiece.ColorType)Random.Range(0, pieces[x, collumnHeight - 1].ColorComponent.NumColor));
+				Destroy(pieceBelow.gameObject);
 				movedPiece = true;
 			}
 		}
