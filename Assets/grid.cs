@@ -7,6 +7,7 @@ public class grid : MonoBehaviour { //3D MATCH 3
 	public enum PieceType{
 		EMPTY,
 		NORMAL,
+		OBSTICAL,
 		COUNT, //this is just to make looping easier. no more -1
 	};
 
@@ -47,7 +48,14 @@ public class grid : MonoBehaviour { //3D MATCH 3
 			}
 		}
 
+
 		PlacePieces();
+
+		/*Vector3 bubPos = pieces[totalRows - 3, collumnHeight - 3].Pos;
+		Quaternion bubRot = pieces[totalRows - 3, collumnHeight - 3].Rot;
+		Destroy(pieces[totalRows - 3, collumnHeight - 3].gameObject);
+		SpawnNewPiece(totalRows - 3, collumnHeight - 3, bubPos, bubRot, PieceType.OBSTICAL);*/
+
 		StartCoroutine(Fill());
 	}
 
