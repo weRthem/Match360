@@ -31,6 +31,9 @@ public class grid : MonoBehaviour { //3D MATCH 3
 
 	private GamePiece[,] pieces;
 
+	private GamePiece pressedPiece;
+	private GamePiece enteredPiece;
+
 	int ang = 0;
 
 	Vector3 center; //the grids center
@@ -50,11 +53,6 @@ public class grid : MonoBehaviour { //3D MATCH 3
 
 
 		PlacePieces();
-
-		/*Vector3 bubPos = pieces[totalRows - 3, collumnHeight - 3].Pos;
-		Quaternion bubRot = pieces[totalRows - 3, collumnHeight - 3].Rot;
-		Destroy(pieces[totalRows - 3, collumnHeight - 3].gameObject);
-		SpawnNewPiece(totalRows - 3, collumnHeight - 3, bubPos, bubRot, PieceType.OBSTICAL);*/
 
 		StartCoroutine(Fill());
 	}
@@ -124,7 +122,7 @@ public class grid : MonoBehaviour { //3D MATCH 3
 
 					if (pieceBelow.Type == PieceType.EMPTY) {
 						Destroy(pieceBelow.gameObject);
-						piece.MovableComponent.Move(pieceBelow.Pos, pieceBelow.Rot, fillTime);
+						piece.MovableComponent.Move(x, y, pieceBelow.Pos, pieceBelow.Rot, fillTime);
 						pieces[x, y - 1] = piece;
 						SpawnNewPiece(x, y, piecePos, pieceRot, PieceType.EMPTY);
 						movedPiece = true;
@@ -143,8 +141,8 @@ public class grid : MonoBehaviour { //3D MATCH 3
 				newPiece.transform.parent = transform;
 
 				pieces[x, collumnHeight - 1] = newPiece.GetComponent<GamePiece>();
-				pieces[x, collumnHeight - 1].Init(pieceBelowPos, pieceBelow.Rot, this, PieceType.NORMAL);
-				pieces[x, collumnHeight - 1].MovableComponent.Move(pieceBelow.Pos, pieceBelow.Rot, fillTime);
+				pieces[x, collumnHeight - 1].Init(x, collumnHeight - 1, pieceBelowPos, pieceBelow.Rot, this, PieceType.NORMAL);
+				pieces[x, collumnHeight - 1].MovableComponent.Move(x, collumnHeight - 1, pieceBelow.Pos, pieceBelow.Rot, fillTime);
 				pieces[x, collumnHeight - 1].ColorComponent.SetColor((ColorPiece.ColorType)Random.Range(0, pieces[x, collumnHeight - 1].ColorComponent.NumColor));
 				Destroy(pieceBelow.gameObject);
 				movedPiece = true;
@@ -159,8 +157,50 @@ public class grid : MonoBehaviour { //3D MATCH 3
 		GameObject newPiece = (GameObject)Instantiate(piecePrefabDict[type], pos, rot);
 		newPiece.transform.parent = transform;
 		pieces[x, y] = newPiece.GetComponent<GamePiece>();
-		pieces[x, y].Init(pos, rot, this, type);
+		pieces[x, y].Init(x, y, pos, rot, this, type);
 
 		return pieces[x, y];
+	}
+
+
+	public bool IsAdjacent(GamePiece piece1, GamePiece piece2)
+	{
+		Debug.Log("Piece1: " + piece1.X + " : " + piece1.Y);
+		Debug.Log("Piece2: " + piece2.X + " : " + piece2.Y);
+		return (piece1.X == piece2.X && (int)Mathf.Abs(piece1.Y - piece2.Y) == 1)
+			|| (piece1.Y == piece2.Y && (int)Mathf.Abs(piece1.X - piece2.X) == 1);
+	}
+
+	public void SwapPieces(GamePiece piece1, GamePiece piece2)
+	{
+		if (piece1.IsMovable() && piece2.IsMovable()) {
+			pieces[piece1.X, piece1.Y] = piece2;
+			pieces[piece2.X, piece2.Y] = piece1;
+
+			int piece1X = piece1.X;
+			int piece1Y = piece1.Y;
+			Vector3 piece1Pos = piece1.Pos;
+			Quaternion piece1Rot = piece1.Rot;
+
+			piece1.MovableComponent.Move(piece2.X, piece2.Y, piece2.Pos, piece2.Rot, fillTime);
+			piece2.MovableComponent.Move(piece1X, piece1Y, piece1Pos, piece1Rot, fillTime);
+		}
+	}
+
+	public void PressedPiece(GamePiece piece)
+	{
+		pressedPiece = piece;
+	}
+
+	public void EnterPiece(GamePiece piece)
+	{
+		enteredPiece = piece;
+	}
+
+	public void ReleasePiece()
+	{
+		if (IsAdjacent(pressedPiece, enteredPiece)) {
+			SwapPieces(pressedPiece, enteredPiece);
+		}
 	}
 }

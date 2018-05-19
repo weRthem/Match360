@@ -7,6 +7,8 @@ public class GamePiece : MonoBehaviour
 
 	private Vector3 pos;
 	private Quaternion rot;
+	private int x;
+	private int y;
 
 	public Vector3 Pos //allows other scripts to access the pieces location
 	{
@@ -24,6 +26,26 @@ public class GamePiece : MonoBehaviour
 		set {
 			if (IsMovable()) {
 				rot = value;
+			}
+		}
+	}
+
+	public int X //allows other scripts to access the x position in the 3d array
+	{
+		get { return x; }
+		set {
+			if (IsMovable()) {
+				x = value;
+			}
+		}
+	}
+
+	public int Y //allows other scripts to access the y position in the 3d array
+	{
+		get { return y; }
+		set {
+			if (IsMovable()) {
+				y = value;
 			}
 		}
 	}
@@ -75,11 +97,26 @@ public class GamePiece : MonoBehaviour
 
 	}
 
-	public void Init(Vector3 _pos, Quaternion _rot, grid _grid, grid.PieceType _type){ //Sets the pieces location
+	public void Init(int _x, int _y, Vector3 _pos, Quaternion _rot, grid _grid, grid.PieceType _type){ //Sets the pieces location
+		x = _x;
+		y = _y;
 		pos = _pos;
 		rot = _rot; 
 		Grid = _grid;
 		type = _type;
+	}
+
+
+	private void OnMouseEnter(){
+		Grid.EnterPiece(this);
+	}
+
+	private void OnMouseUp(){
+		Grid.ReleasePiece();
+	}
+
+	private void OnMouseDown(){
+		Grid.PressedPiece(this);
 	}
 
 	public bool IsMovable(){
