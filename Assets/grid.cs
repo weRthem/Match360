@@ -122,7 +122,7 @@ public class grid : MonoBehaviour { //3D MATCH 3
 
 					if (pieceBelow.Type == PieceType.EMPTY) {
 						Destroy(pieceBelow.gameObject);
-						piece.MovableComponent.Move(x, y, pieceBelow.Pos, pieceBelow.Rot, fillTime);
+						piece.MovableComponent.Move(x, y - 1, pieceBelow.Pos, pieceBelow.Rot, fillTime);
 						pieces[x, y - 1] = piece;
 						SpawnNewPiece(x, y, piecePos, pieceRot, PieceType.EMPTY);
 						movedPiece = true;
@@ -163,16 +163,15 @@ public class grid : MonoBehaviour { //3D MATCH 3
 	}
 
 
-	public bool IsAdjacent(GamePiece piece1, GamePiece piece2)
-	{
+	public bool IsAdjacent(GamePiece piece1, GamePiece piece2){
 		Debug.Log("Piece1: " + piece1.X + " : " + piece1.Y);
 		Debug.Log("Piece2: " + piece2.X + " : " + piece2.Y);
 		return (piece1.X == piece2.X && (int)Mathf.Abs(piece1.Y - piece2.Y) == 1)
-			|| (piece1.Y == piece2.Y && (int)Mathf.Abs(piece1.X - piece2.X) == 1);
+			|| (piece1.Y == piece2.Y && (int)Mathf.Abs(piece1.X - piece2.X) == 1)
+			|| (piece1.Y == piece2.Y && (int)Mathf.Abs(piece1.X - piece2.X) == totalRows - 1);
 	}
 
-	public void SwapPieces(GamePiece piece1, GamePiece piece2)
-	{
+	public void SwapPieces(GamePiece piece1, GamePiece piece2){
 		if (piece1.IsMovable() && piece2.IsMovable()) {
 			pieces[piece1.X, piece1.Y] = piece2;
 			pieces[piece2.X, piece2.Y] = piece1;
