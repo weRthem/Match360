@@ -176,13 +176,18 @@ public class grid : MonoBehaviour { //3D MATCH 3
 			pieces[piece1.X, piece1.Y] = piece2;
 			pieces[piece2.X, piece2.Y] = piece1;
 
-			int piece1X = piece1.X;
-			int piece1Y = piece1.Y;
-			Vector3 piece1Pos = piece1.Pos;
-			Quaternion piece1Rot = piece1.Rot;
+			if (GetMatch(piece1, piece2.X, piece2.Y) != null || GetMatch(piece2, piece1.X, piece1.Y) != null) {
+				int piece1X = piece1.X;
+				int piece1Y = piece1.Y;
+				Vector3 piece1Pos = piece1.Pos;
+				Quaternion piece1Rot = piece1.Rot;
 
-			piece1.MovableComponent.Move(piece2.X, piece2.Y, piece2.Pos, piece2.Rot, fillTime);
-			piece2.MovableComponent.Move(piece1X, piece1Y, piece1Pos, piece1Rot, fillTime);
+				piece1.MovableComponent.Move(piece2.X, piece2.Y, piece2.Pos, piece2.Rot, fillTime);
+				piece2.MovableComponent.Move(piece1X, piece1Y, piece1Pos, piece1Rot, fillTime);
+			} else {
+				pieces[piece1.X, piece1.Y] = piece1;
+				pieces[piece2.X, piece2.Y] = piece2;
+			}
 		}
 	}
 
@@ -202,4 +207,96 @@ public class grid : MonoBehaviour { //3D MATCH 3
 			SwapPieces(pressedPiece, enteredPiece);
 		}
 	}
+
+	public List<GamePiece> GetMatch(GamePiece piece, int newX, int newY)
+	{
+		if (piece.IsColored()) {
+			ColorPiece.ColorType color = piece.ColorComponent.Color;
+			List<GamePiece> horizontalPieces = new List<GamePiece>();
+			List<GamePiece> verticalPieces = new List<GamePiece>();
+			List<GamePiece> matchingPieces = new List<GamePiece>();
+
+			//First check horizontal pieces
+			horizontalPieces.Add(piece);
+
+			for (int dir = 0; dir <= 1; dir++) {
+				for (int xOffset = 1; xOffset < totalRows; xOffset++) {
+					int x;
+					if (dir == 0) { //Left
+						x = newX - xOffset;
+						if (x < 0) {
+							x = x + totalRows;
+						}
+					} else { //Right
+						x = newX + xOffset;
+						if (x >= totalRows) {
+							x = x - totalRows;
+						}
+					}
+
+					Debug.Log(xOffset);
+
+					if (x == newX) {
+						break;
+					}
+
+					if (pieces[x, newY].IsColored() && pieces[x, newY].ColorComponent.Color == color) {
+						horizontalPieces.Add(pieces[x, newY]);
+					} else {
+						break;
+					}
+				}
+			}
+
+			if (horizontalPieces.Count >= 3) {
+				for (int i = 0; i < horizontalPieces.Count; i++) {
+					matchingPieces.Add(horizontalPieces[i]);
+				}
+			}
+
+			if (matchingPieces.Count >= 3) {
+				return matchingPieces;
+			}
+
+			//Didnt find anything going horizontally first now
+			//Check Vertical
+			verticalPieces.Add(piece);
+
+			for (int dir = 0; dir <= 1; dir++) {
+				for (int yOffset = 1; yOffset < collumnHeight; yOffset++) {
+					int y;
+					if (dir == 0) { //Left
+						y = newY - yOffset;
+					} else { //Right
+						y = newY + yOffset;
+					}
+
+					Debug.Log(yOffset + " Y offset");
+
+					if (y < 0 || y >= collumnHeight) {
+						break;
+					}
+
+					if (pieces[newX, y].IsColored() && pieces[newX, y].ColorComponent.Color == color) {
+						verticalPieces.Add(pieces[newX, y]);
+					} else {
+						break;
+					}
+				}
+			}
+
+			if (verticalPieces.Count >= 3) {
+				for (int i = 0; i < verticalPieces.Count; i++) {
+					matchingPieces.Add(verticalPieces[i]);
+				}
+			}
+
+			if (matchingPieces.Count >= 3) {
+				return matchingPieces;
+			}
+		}
+
+		return null;
+	}
+
 }
