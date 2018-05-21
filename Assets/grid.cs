@@ -102,10 +102,19 @@ public class grid : MonoBehaviour { //3D MATCH 3
 	}
 
 	public IEnumerator Fill(){
-		while (FillStep()) {
+		bool needsRefill = true;
+
+		while (needsRefill) {
+			yield return new WaitForSeconds(fillTime);
+
+			while (FillStep()) {
 			yield return new WaitForSeconds(fillTime);
 		}
+
+
+		needsRefill = ClearAllValidMatches();
 	}
+}
 
 	public bool FillStep(){ //TODO invert the fill so it fills from the top and not the bottom
 		bool movedPiece = false;
@@ -184,6 +193,10 @@ public class grid : MonoBehaviour { //3D MATCH 3
 
 				piece1.MovableComponent.Move(piece2.X, piece2.Y, piece2.Pos, piece2.Rot, fillTime);
 				piece2.MovableComponent.Move(piece1X, piece1Y, piece1Pos, piece1Rot, fillTime);
+
+				ClearAllValidMatches();
+
+				StartCoroutine(Fill());
 			} else {
 				pieces[piece1.X, piece1.Y] = piece1;
 				pieces[piece2.X, piece2.Y] = piece2;
@@ -375,6 +388,43 @@ public class grid : MonoBehaviour { //3D MATCH 3
 		}
 
 		return null;
+	}
+
+	public bool ClearAllValidMatches()
+	{
+		bool needsRefill = false;
+
+		for (int y = 0; y < collumnHeight; y++) {
+			for (int x = 0; x < totalRows; x++) {
+				if (pieces[x, y].IsClearable()) {
+					List<GamePiece> match = GetMatch(pieces[x, y], x, y);
+
+					if (match != null) {
+						for (int i = 0; i < match.Count; i++) {
+							if (ClearPiece(match[i].X, match[i].Y)) {
+								needsRefill = true;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return needsRefill;
+	}
+
+	public bool ClearPiece(int x, int y)
+	{
+		if (pieces[x, y].IsClearable() && !pieces[x, y].ClearableComponent.IsBeingCleared) {
+			Vector3 piecePos = pieces[x, y].Pos;
+			Quaternion pieceRot = pieces[x, y].Rot;
+			pieces[x, y].ClearableComponent.Clear();
+			SpawnNewPiece(x, y, piecePos, pieceRot, PieceType.EMPTY);
+
+			return true;
+		}
+
+		return false;
 	}
 
 }

@@ -79,10 +79,18 @@ public class GamePiece : MonoBehaviour
 		get { return colorComponent; }
 	}
 
+	private Clearable clearableComponent;
+
+	public Clearable ClearableComponent
+	{
+		get { return clearableComponent; }
+	}
+
 	private void Awake()
 	{
 		movableComponent = GetComponent<MovablePieces>();
 		colorComponent = GetComponent<ColorPiece>();
+		clearableComponent = GetComponent<Clearable>();
 	}
 
 	// Use this for initialization
@@ -126,5 +134,10 @@ public class GamePiece : MonoBehaviour
 	public bool IsColored()
 	{
 		return colorComponent != null;
+	}
+
+	public bool IsClearable()
+	{
+		return clearableComponent != null;
 	}
 }
