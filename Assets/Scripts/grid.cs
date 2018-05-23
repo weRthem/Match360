@@ -7,6 +7,8 @@ public class grid : MonoBehaviour { //3D MATCH 3
 	public enum PieceType{
 		EMPTY,
 		NORMAL,
+		ROW_CLEAR,
+		COLLUMN_CLEAR,
 		OBSTICAL,
 		COUNT, //this is just to make looping easier. no more -1
 	};
@@ -195,6 +197,17 @@ public class grid : MonoBehaviour { //3D MATCH 3
 				piece2.MovableComponent.Move(piece1X, piece1Y, piece1Pos, piece1Rot, fillTime);
 
 				ClearAllValidMatches();
+
+				if (piece1.Type == PieceType.ROW_CLEAR || piece1.Type == PieceType.COLLUMN_CLEAR) {
+					ClearPiece(piece1.X, piece1.Y);
+				}
+
+				if (piece2.Type == PieceType.ROW_CLEAR || piece2.Type == PieceType.COLLUMN_CLEAR) {
+					ClearPiece(piece2.X, piece2.Y);
+				}
+
+				pressedPiece = null;
+				enteredPiece = null;
 
 				StartCoroutine(Fill());
 			} else {
@@ -400,9 +413,41 @@ public class grid : MonoBehaviour { //3D MATCH 3
 					List<GamePiece> match = GetMatch(pieces[x, y], x, y);
 
 					if (match != null) {
+						PieceType specialPieceType = PieceType.COUNT;
+						GamePiece randomPiece = match[Random.Range(0, match.Count)];
+						Vector3 specialPiecePos = randomPiece.Pos;
+						Quaternion specialPieceRot = randomPiece.Rot;
+						int specialPieceX = randomPiece.X;
+						int specialPieceY = randomPiece.Y;
+
+						if (match.Count == 4) {
+							if (pressedPiece == null || enteredPiece == null) {
+								specialPieceType = (PieceType)Random.Range((int)PieceType.ROW_CLEAR, (int)PieceType.COLLUMN_CLEAR);
+							} else if (pressedPiece.Y == enteredPiece.Y) {
+								specialPieceType = PieceType.ROW_CLEAR;
+							} else {
+								specialPieceType = PieceType.COLLUMN_CLEAR;
+							}
+						}
+
 						for (int i = 0; i < match.Count; i++) {
 							if (ClearPiece(match[i].X, match[i].Y)) {
 								needsRefill = true;
+								if (match[i] == pressedPiece || match[i] == enteredPiece) {
+									specialPieceX = match[i].X;
+									specialPieceY = match[i].Y;
+									specialPiecePos = match[i].Pos;
+									specialPieceRot = match[i].Rot;
+								}
+							}
+						}
+
+						if (specialPieceType != PieceType.COUNT) {
+							Destroy(pieces[specialPieceX, specialPieceY]);
+							GamePiece newPiece = SpawnNewPiece(specialPieceX, specialPieceY, specialPiecePos, specialPieceRot,specialPieceType);
+
+							if ((specialPieceType == PieceType.ROW_CLEAR || specialPieceType == PieceType.COLLUMN_CLEAR) && newPiece.IsColored() && match[0].IsColored()) {
+								newPiece.ColorComponent.SetColor(match[0].ColorComponent.Color);
 							}
 						}
 					}

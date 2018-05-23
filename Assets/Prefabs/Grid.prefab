@@ -56,8 +56,12 @@ MonoBehaviour:
     prefab: {fileID: 1751387707271286, guid: d2dd80bd689d7304cb46036a45e3ad5a, type: 2}
   - type: 1
     prefab: {fileID: 1121557178396556, guid: 971efcd3d46c58546a22d56f9fd4618d, type: 2}
-  - type: 2
+  - type: 4
     prefab: {fileID: 1371165194187304, guid: efa842d3026349b4e95fb2188e5a4755, type: 2}
+  - type: 2
+    prefab: {fileID: 1477901875879356, guid: 3811a119036af7b41a6ee9dae22068f6, type: 2}
+  - type: 3
+    prefab: {fileID: 1449426722447248, guid: ff2621caf9f5bb24ab1671b0a57dcaba, type: 2}
   backgroundPrefab: {fileID: 1385261346022074, guid: 1e12d94a39c86cf40b51b62fb22b4d85,
     type: 2}
   totalRows: 21
