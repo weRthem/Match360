@@ -33,7 +33,7 @@ public class Clearable : MonoBehaviour
 
 	}
 
-	public void Clear()
+	public virtual void Clear()
 	{
 		isBeingCleared = true;
 		StartCoroutine(ClearCoroutine());

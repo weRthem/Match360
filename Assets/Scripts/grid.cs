@@ -9,6 +9,7 @@ public class grid : MonoBehaviour { //3D MATCH 3
 		NORMAL,
 		ROW_CLEAR,
 		COLLUMN_CLEAR,
+		RAINBOW,
 		OBSTICAL,
 		COUNT, //this is just to make looping easier. no more -1
 	};
@@ -187,7 +188,7 @@ public class grid : MonoBehaviour { //3D MATCH 3
 			pieces[piece1.X, piece1.Y] = piece2;
 			pieces[piece2.X, piece2.Y] = piece1;
 
-			if (GetMatch(piece1, piece2.X, piece2.Y) != null || GetMatch(piece2, piece1.X, piece1.Y) != null) {
+			if (GetMatch(piece1, piece2.X, piece2.Y) != null || GetMatch(piece2, piece1.X, piece1.Y) != null || piece1.Type == PieceType.RAINBOW || piece2.Type == PieceType.RAINBOW) {
 				int piece1X = piece1.X;
 				int piece1Y = piece1.Y;
 				Vector3 piece1Pos = piece1.Pos;
@@ -195,6 +196,26 @@ public class grid : MonoBehaviour { //3D MATCH 3
 
 				piece1.MovableComponent.Move(piece2.X, piece2.Y, piece2.Pos, piece2.Rot, fillTime);
 				piece2.MovableComponent.Move(piece1X, piece1Y, piece1Pos, piece1Rot, fillTime);
+
+				if (piece1.Type == PieceType.RAINBOW && piece1.IsClearable() && piece2.IsColored()) {
+					ClearColorPiece clearColor = piece1.GetComponent<ClearColorPiece>();
+
+					if (clearColor) {
+						clearColor.Color = piece2.ColorComponent.Color;
+					}
+
+					ClearPiece(piece1.X, piece1.Y);
+				}
+
+				if (piece2.Type == PieceType.RAINBOW && piece2.IsClearable() && piece1.IsColored()) {
+					ClearColorPiece clearColor = piece2.GetComponent<ClearColorPiece>();
+
+					if (clearColor) {
+						clearColor.Color = piece1.ColorComponent.Color;
+					}
+
+					ClearPiece(piece2.X, piece2.Y);
+				}
 
 				ClearAllValidMatches();
 
@@ -428,6 +449,8 @@ public class grid : MonoBehaviour { //3D MATCH 3
 							} else {
 								specialPieceType = PieceType.COLLUMN_CLEAR;
 							}
+						} else if (match.Count >= 5) {
+							specialPieceType = PieceType.RAINBOW;
 						}
 
 						for (int i = 0; i < match.Count; i++) {
@@ -448,6 +471,8 @@ public class grid : MonoBehaviour { //3D MATCH 3
 
 							if ((specialPieceType == PieceType.ROW_CLEAR || specialPieceType == PieceType.COLLUMN_CLEAR) && newPiece.IsColored() && match[0].IsColored()) {
 								newPiece.ColorComponent.SetColor(match[0].ColorComponent.Color);
+							} else if (specialPieceType == PieceType.RAINBOW && newPiece.IsColored()) {
+								newPiece.ColorComponent.SetColor(ColorPiece.ColorType.ANY);
 							}
 						}
 					}
@@ -470,6 +495,31 @@ public class grid : MonoBehaviour { //3D MATCH 3
 		}
 
 		return false;
+	}
+
+	public void ClearRow(int row)
+	{
+		for (int x = 0; x < totalRows; x++) {
+			ClearPiece(x, row);
+		}
+	}
+
+	public void ClearCollumn(int collumn)
+	{
+		for (int y = 0; y < collumnHeight; y++) {
+			ClearPiece(collumn, y);
+		}
+	}
+
+	public void ClearColor(ColorPiece.ColorType color)
+	{
+		for (int x = 0; x < totalRows; x++) {
+			for (int y = 0; y < collumnHeight; y++) {
+				if (pieces[x, y].IsColored() && (pieces[x, y].ColorComponent.Color == color || color == ColorPiece.ColorType.ANY)) {
+					ClearPiece(x, y);
+				}
+			}
+		}
 	}
 
 }

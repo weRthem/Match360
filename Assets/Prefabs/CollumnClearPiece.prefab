@@ -39,8 +39,8 @@ GameObject:
   - component: {fileID: 114214541282224722}
   - component: {fileID: 114291191802596222}
   - component: {fileID: 65118909563025024}
-  - component: {fileID: 114969068718062880}
   - component: {fileID: 95255907277341856}
+  - component: {fileID: 114818825279890640}
   m_Layer: 0
   m_Name: CollumnClearPiece
   m_TagString: Untagged
@@ -140,7 +140,7 @@ MonoBehaviour:
     sprite: {fileID: 21300000, guid: a2af2b453925f814f8cb44271e2dd116, type: 3}
   - color: 5
     sprite: {fileID: 21300000, guid: 9cae86fff3ec91049b3248769d723885, type: 3}
---- !u!114 &114969068718062880
+--- !u!114 &114818825279890640
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -148,10 +148,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1449426722447248}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: da9569bc7098d524c9edca84f2fe07ac, type: 3}
+  m_Script: {fileID: 11500000, guid: 63fbad2f2a0213d4ba7fd930f2cb5955, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   clearAnimation: {fileID: 7400000, guid: 8f1608e27ad3c8e4ab7db207898a9160, type: 2}
+  isRow: 0
 --- !u!114 &114989422759743166
 MonoBehaviour:
   m_ObjectHideFlags: 1
