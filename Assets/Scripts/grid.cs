@@ -57,7 +57,7 @@ public class grid : MonoBehaviour { //3D MATCH 3
 
 		PlacePieces();
 
-		StartCoroutine(Fill());
+		FirstFill();
 	}
 
 	private void PlacePieces()
@@ -119,6 +119,54 @@ public class grid : MonoBehaviour { //3D MATCH 3
 	}
 }
 
+	void FirstFill() {
+		for (int x = 0; x < totalRows; x++ ) {
+			for (int y = 0; y < collumnHeight; y++) {
+				GamePiece oldPiece = pieces[x, y];
+				GamePiece belowPiece;
+				GamePiece leftPiece;
+				Vector3 oldPiecePos = oldPiece.Pos;
+
+				if (x < 1) {
+					leftPiece = null;
+				} else {
+					leftPiece = pieces[x - 1, y];
+				}
+
+				if (y < 1) {
+					belowPiece = null;
+				} else {
+					belowPiece = pieces[x, y - 1];
+				}
+
+
+				if (oldPiece.Type == PieceType.EMPTY) {
+					GameObject newPiece = (GameObject)Instantiate(piecePrefabDict[PieceType.NORMAL], oldPiecePos, oldPiece.Rot);
+					newPiece.transform.parent = transform;
+
+					pieces[x, y] = newPiece.GetComponent<GamePiece>();
+					pieces[x, y].Init(x, y, oldPiecePos, oldPiece.Rot, this, PieceType.NORMAL);
+					if (belowPiece == null && leftPiece == null) {
+						pieces[x, y].ColorComponent.SetColor((ColorPiece.ColorType)Random.Range(0, pieces[x, y].ColorComponent.NumColor));
+					} else if (belowPiece == null) {
+						do {
+							pieces[x, y].ColorComponent.SetColor((ColorPiece.ColorType)Random.Range(0, pieces[x, y].ColorComponent.NumColor));
+						} while (pieces[x, y].ColorComponent.Color == leftPiece.ColorComponent.Color);
+					} else if (leftPiece == null) {
+						do {
+							pieces[x, y].ColorComponent.SetColor((ColorPiece.ColorType)Random.Range(0, pieces[x, y].ColorComponent.NumColor));
+						} while (pieces[x, y].ColorComponent.Color == belowPiece.ColorComponent.Color);
+					} else {
+						do {
+							pieces[x, y].ColorComponent.SetColor((ColorPiece.ColorType)Random.Range(0, pieces[x, y].ColorComponent.NumColor));
+						} while (pieces[x, y].ColorComponent.Color == belowPiece.ColorComponent.Color || pieces[x, y].ColorComponent.Color == leftPiece.ColorComponent.Color);
+					}
+					Destroy(oldPiece.gameObject);
+				}
+			}
+		}
+	}
+
 	public bool FillStep(){ //TODO invert the fill so it fills from the top and not the bottom
 		bool movedPiece = false;
 
@@ -173,7 +221,6 @@ public class grid : MonoBehaviour { //3D MATCH 3
 
 		return pieces[x, y];
 	}
-
 
 	public bool IsAdjacent(GamePiece piece1, GamePiece piece2){
 		Debug.Log("Piece1: " + piece1.X + " : " + piece1.Y);
