@@ -46,7 +46,7 @@ public class Clearable : MonoBehaviour
 		if (animator) {
 			animator.Play(clearAnimation.name);
 
-			yield return new WaitForSeconds(clearAnimation.length);
+			yield return new WaitForSeconds(clearAnimation.length + 1f);
 
 			Destroy(gameObject);
 		}

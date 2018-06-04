@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ClearColorPiece : Clearable
 {
-
+	/*
 	private ColorPiece.ColorType color;
 
 	public ColorPiece.ColorType Color
@@ -30,5 +30,5 @@ public class ClearColorPiece : Clearable
 		base.Clear();
 		piece.GridRef.ClearColor(color);
 	}
-
+	*/
 }

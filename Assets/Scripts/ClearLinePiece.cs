@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ClearLinePiece : Clearable
 {
-
+	/*
 	public bool isRow;
 
 	// Use this for initialization
@@ -31,5 +31,5 @@ public class ClearLinePiece : Clearable
 			//clears collumn
 			piece.GridRef.ClearCollumn(piece.X);
 		}
-	}
+	}*/
 }

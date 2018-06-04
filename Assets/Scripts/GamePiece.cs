@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class GamePiece : MonoBehaviour
 {
-
 	private Vector3 pos;
 	private Quaternion rot;
 	private int x;
@@ -113,7 +112,7 @@ public class GamePiece : MonoBehaviour
 		Grid = _grid;
 		type = _type;
 	}
-
+	/*
 
 	private void OnMouseEnter(){
 		Grid.EnterPiece(this);
@@ -125,12 +124,12 @@ public class GamePiece : MonoBehaviour
 
 	private void OnMouseDown(){
 		Grid.PressedPiece(this);
-	}
+	}*/
 
 	public bool IsMovable(){
 		return movableComponent != null;
 	}
-
+	/*
 	public bool IsColored()
 	{
 		return colorComponent != null;
@@ -139,5 +138,5 @@ public class GamePiece : MonoBehaviour
 	public bool IsClearable()
 	{
 		return clearableComponent != null;
+	}*/
 	}
-}
