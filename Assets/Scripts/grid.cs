@@ -62,6 +62,7 @@ public class grid : MonoBehaviour
 
 		PlaceGrid();
 		SpawnPieces();
+		Fill();
 
 	}
 
@@ -92,22 +93,23 @@ public class grid : MonoBehaviour
 			Vector3 pos = GridCirlcle();
 			Quaternion rot = Quaternion.FromToRotation(Vector3.forward, center - pos); //Faces the tiles toward the center
 			for (int y = 0; y < collumnHeight; y++) {
-				//creates a tile and childs it to the grid
-				GameObject newPiece = (GameObject)Instantiate(piecePrefabDict[PieceType.NORMAL], Vector3.zero, rot);
-				newPiece.name = "EmptyPiece(" + x + ", " + y + ")"; //names the piece to make it easier to debug
-				newPiece.transform.parent = transform;
-
-
-				pieces[x, y] = newPiece.GetComponent<GamePiece>();
-				pieces[x, y].Init(x, y, pos, rot, this, PieceType.NORMAL);
-
-				if (pieces[x, y].IsMovable()) {
-					pieces[x, y].MovableComponent.Move(x, y, pos, rot, 0f);
-				}
-
+				SpawnNewPiece(x, y, pos, rot, PieceType.NORMAL);
 				pos.y += distBetweenRows;
 			}
 		}
+	}
+
+	private GamePiece SpawnNewPiece(int x, int y, Vector3 pos, Quaternion rot, PieceType type){
+		//creates a tile and childs it to the grid
+		GameObject newPiece = (GameObject)Instantiate(piecePrefabDict[type], pos, rot);
+		newPiece.name = "Piece(" + x + ", " + y + ")"; //names the piece to make it easier to debug
+		newPiece.transform.parent = transform;
+
+
+		pieces[x, y] = newPiece.GetComponent<GamePiece>();
+		pieces[x, y].Init(x, y, pos, rot, this, type);
+
+		return pieces[x, y];
 	}
 
 	public Vector3 GridCirlcle()
@@ -119,6 +121,52 @@ public class grid : MonoBehaviour
 		pos.z = center.z + radius * Mathf.Cos(ang * Mathf.Deg2Rad);
 
 		return pos;
+	}
+
+	public void Fill()
+	{
+		while (FillStep()) {
+		}
+	}
+
+	public bool FillStep()
+	{
+		bool movedPiece = false;
+
+		for (int y = collumnHeight - 2; y >= 0; y--) {
+			for (int x = 0; x < totalRows; x++) {
+				GamePiece piece = pieces[x, y];
+
+				GamePiece pieceBelow = emptyPieces[x, y + 1];
+
+				if (pieceBelow.isActiveAndEnabled) {
+					piece.MovableComponent.Move(x, y + 1, pieceBelow.Pos, pieceBelow.Rot, 0f);
+					emptyPieces[x, y + 1].gameObject.SetActive(false);
+					pieces[x, y + 1] = piece;
+					emptyPieces[x, y].gameObject.SetActive(true);
+					movedPiece = true;
+				}
+
+			}
+		}
+
+		for (int x = 0; x < totalRows; x++) {
+			GamePiece pieceBelow = emptyPieces[x, 0];
+
+			if (pieceBelow.isActiveAndEnabled) {
+				GameObject newPiece = (GameObject)Instantiate(piecePrefabDict[PieceType.NORMAL], pieceBelow.Pos, pieceBelow.Rot);
+				newPiece.transform.parent = transform;
+
+				pieces[x, 0] = newPiece.GetComponent<GamePiece>();
+				pieces[x, 0].Init(x, -1, pieceBelow.Pos, pieceBelow.Rot, this, PieceType.NORMAL);
+				pieces[x, 0].MovableComponent.Move(x, 0, pieceBelow.Pos, pieceBelow.Rot, 0f);
+				pieces[x, 0].ColorComponent.SetColor((ColorPiece.ColorType)Random.Range(0, pieces[x, 0].ColorComponent.NumColor));
+				pieceBelow.gameObject.SetActive(false);
+				movedPiece = true;
+			}
+		}
+
+		return movedPiece;
 	}
 
 	// Update is called once per frame

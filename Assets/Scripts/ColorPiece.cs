@@ -44,7 +44,7 @@ public class ColorPiece : MonoBehaviour {
 
 	private void Awake()
 	{
-		sprite = transform.Find("piece").GetComponent<SpriteRenderer>();
+		sprite = transform.GetComponentInChildren<SpriteRenderer>();
 
 		colorSpriteDict = new Dictionary<ColorType, Sprite>();
 

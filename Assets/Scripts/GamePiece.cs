@@ -129,14 +129,15 @@ public class GamePiece : MonoBehaviour
 	public bool IsMovable(){
 		return movableComponent != null;
 	}
-	/*
+
 	public bool IsColored()
 	{
 		return colorComponent != null;
 	}
 
+	/*
 	public bool IsClearable()
 	{
 		return clearableComponent != null;
 	}*/
-	}
+}
