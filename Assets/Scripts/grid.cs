@@ -38,6 +38,8 @@ public class grid : MonoBehaviour
 	private GamePiece[,] pieces;
 	private GamePiece[,] emptyPieces;
 
+	private bool inverse = false;
+
 	private GamePiece pressedPiece;
 	private GamePiece enteredPiece;
 
@@ -61,8 +63,7 @@ public class grid : MonoBehaviour
 		pieces = new GamePiece[totalRows, collumnHeight];
 
 		PlaceGrid();
-		SpawnPieces();
-		Fill();
+		StartCoroutine(Fill());
 
 	}
 
@@ -79,6 +80,7 @@ public class grid : MonoBehaviour
 
 				emptyPieces[x, y] = newPiece.GetComponent<GamePiece>();
 				emptyPieces[x, y].Init(x, y, pos, rot, this, PieceType.EMPTY);
+				pieces[x, y] = null;
 
 				//does not move as to avoid bugs =)
 
@@ -123,9 +125,10 @@ public class grid : MonoBehaviour
 		return pos;
 	}
 
-	public void Fill()
-	{
+	public IEnumerator Fill(){
 		while (FillStep()) {
+			inverse = !inverse;
+			yield return new WaitForSeconds(fillTime);
 		}
 	}
 
@@ -133,35 +136,81 @@ public class grid : MonoBehaviour
 	{
 		bool movedPiece = false;
 
-		for (int y = collumnHeight - 2; y >= 0; y--) {
-			for (int x = 0; x < totalRows; x++) {
+		for (int y = collumnHeight - 1; y > 0; y--) {
+			for (int loopX = 0; loopX < totalRows; loopX++) {
+
+				int x = loopX;
+
+				if (inverse) {
+					x = totalRows - 1 - loopX;
+				}
+
 				GamePiece piece = pieces[x, y];
 
-				GamePiece pieceBelow = emptyPieces[x, y + 1];
+				GamePiece pieceBelow = emptyPieces[x, y - 1];
 
-				if (pieceBelow.isActiveAndEnabled) {
-					piece.MovableComponent.Move(x, y + 1, pieceBelow.Pos, pieceBelow.Rot, 0f);
-					emptyPieces[x, y + 1].gameObject.SetActive(false);
-					pieces[x, y + 1] = piece;
-					emptyPieces[x, y].gameObject.SetActive(true);
+				if (pieces[x, y - 1] == null && piece != null) {
+					piece.MovableComponent.Move(x, y - 1, pieceBelow.Pos, pieceBelow.Rot, fillTime);
+					pieces[x, y] = null;
+					pieces[x, y - 1] = piece;
 					movedPiece = true;
-				}
+				} /*else {
+					for (int diag = -1; diag <= 1; diag++) {
+						if (diag != 0) {
+							int diagX = x + diag;
+
+							if (inverse) {
+								diagX = x - diag;
+							}
+
+							if (diagX >= 0 && diagX < totalRows) {
+								GamePiece diagonalPiece = pieces[diagX, y - 1];
+
+								if (diagonalPiece.Type == PieceType.EMPTY) {
+									bool hasPieceAbove = true;
+
+									for (int aboveY = y; aboveY >= 0; aboveY--) {
+										GamePiece pieceAbove = pieces[diagX, aboveY];
+
+										if (pieceAbove.IsMovable()) {
+											break;
+										} else if (!pieceAbove.IsMovable() && pieceAbove.Type != PieceType.EMPTY) {
+											hasPieceAbove = false;
+											break;
+										}
+									}
+
+									if (!hasPieceAbove) {
+										Destroy(diagonalPiece.gameObject);
+										piece.MovableComponent.Move(diagX, y + 1, pieceBelow.Pos, pieceBelow.Rot ,fillTime);
+										pieces[diagX, y + 1] = piece;
+										SpawnNewPiece(x, y, pieceBelow.Pos, pieceBelow.Rot, PieceType.EMPTY);
+										movedPiece = true;
+										break;
+									}
+								}
+							}
+						}
+					}
+				}*/
 
 			}
 		}
 
 		for (int x = 0; x < totalRows; x++) {
-			GamePiece pieceBelow = emptyPieces[x, 0];
+			GamePiece pieceBelow = emptyPieces[x, collumnHeight - 1];
 
-			if (pieceBelow.isActiveAndEnabled) {
-				GameObject newPiece = (GameObject)Instantiate(piecePrefabDict[PieceType.NORMAL], pieceBelow.Pos, pieceBelow.Rot);
+			if (pieces[x, collumnHeight - 1] == null) {
+				Vector3 startPos = pieceBelow.Pos;
+				startPos.y += 1;
+				GameObject newPiece = (GameObject)Instantiate(piecePrefabDict[PieceType.NORMAL], startPos, pieceBelow.Rot);
 				newPiece.transform.parent = transform;
 
-				pieces[x, 0] = newPiece.GetComponent<GamePiece>();
-				pieces[x, 0].Init(x, -1, pieceBelow.Pos, pieceBelow.Rot, this, PieceType.NORMAL);
-				pieces[x, 0].MovableComponent.Move(x, 0, pieceBelow.Pos, pieceBelow.Rot, 0f);
-				pieces[x, 0].ColorComponent.SetColor((ColorPiece.ColorType)Random.Range(0, pieces[x, 0].ColorComponent.NumColor));
-				pieceBelow.gameObject.SetActive(false);
+				pieces[x, collumnHeight - 1] = newPiece.GetComponent<GamePiece>();
+				pieces[x, collumnHeight - 1].Init(x, collumnHeight, pieceBelow.Pos, pieceBelow.Rot, this, PieceType.NORMAL);
+				pieces[x, collumnHeight - 1].MovableComponent.Move(x, collumnHeight - 1, pieceBelow.Pos, pieceBelow.Rot, fillTime);
+				pieces[x, collumnHeight - 1].ColorComponent.SetColor((ColorPiece.ColorType)Random.Range(0, pieces[x, collumnHeight - 1].ColorComponent.NumColor));
+				//pieceBelow.gameObject.SetActive(false);
 				movedPiece = true;
 			}
 		}

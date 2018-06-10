@@ -27,22 +27,14 @@ public class MovablePieces : MonoBehaviour
 
 	public void Move(int newX, int newY, Vector3 newPos, Quaternion newRot, float time){
 
-		piece.X = newX;
-		piece.Y = newY;
-		piece.Pos = newPos;
-		piece.Rot = newRot;
-
-		piece.transform.localPosition = newPos;
-		piece.transform.localRotation = newRot;
-
-		/*if (moveCoroutine != null) {
+		if (moveCoroutine != null) {
 			StopCoroutine(moveCoroutine);
 		}
 		moveCoroutine = MoveCoroutine(newX, newY, newPos, newRot, time);
-		StartCoroutine(moveCoroutine);*/
+		StartCoroutine(moveCoroutine);
 	}
 
-	/*private IEnumerator MoveCoroutine(int newX, int newY,  Vector3 newPos, Quaternion newRot, float time) {
+	private IEnumerator MoveCoroutine(int newX, int newY,  Vector3 newPos, Quaternion newRot, float time) {
 		piece.X = newX;
 		piece.Y = newY;
 		piece.Pos = newPos;
@@ -58,6 +50,7 @@ public class MovablePieces : MonoBehaviour
 		}
 
 		piece.transform.localPosition = newPos;
-	}*/
+		piece.transform.localRotation = newRot;
+	}
 }
 

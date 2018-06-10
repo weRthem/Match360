@@ -71,4 +71,4 @@ MonoBehaviour:
   angIncrease: 17
   distBetweenRows: 0.9
   radius: 3
-  fillTime: 0.3
+  fillTime: 0.1
