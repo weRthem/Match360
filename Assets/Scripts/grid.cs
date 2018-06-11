@@ -224,6 +224,264 @@ public class grid : MonoBehaviour
 
 	}
 
+	public bool IsAdjacent(GamePiece piece1, GamePiece piece2)
+	{
+		return (piece1.X == piece2.X && (int)Mathf.Abs(piece1.Y - piece2.Y) == 1)
+			|| (piece1.Y == piece2.Y && (int)Mathf.Abs(piece1.X - piece2.X) == 1)
+			|| (piece1.Y == piece2.Y && (int)Mathf.Abs(piece1.X - piece2.X) == totalRows - 1);
+	}
 
+	public void SwapPieces(GamePiece piece1, GamePiece piece2)
+	{
+		if (piece1.IsMovable() && piece2.IsMovable()) {
+			pieces[piece1.X, piece1.Y] = piece2;
+			pieces[piece2.X, piece2.Y] = piece1;
+
+			if (GetMatch(piece1, piece2.X, piece2.Y) != null || GetMatch(piece2, piece1.X, piece1.Y) != null) {
+				int piece1X = piece1.X;
+				int piece1Y = piece1.Y;
+				Vector3 piece1Pos = piece1.Pos;
+				Quaternion piece1Rot = piece1.Rot;
+
+				piece1.MovableComponent.Move(piece2.X, piece2.Y, piece2.Pos, piece2.Rot, fillTime);
+				piece2.MovableComponent.Move(piece1X, piece1Y, piece1Pos, piece1Rot, fillTime);
+
+			} else {
+				int piece1X = piece1.X;
+				int piece1Y = piece1.Y;
+				Vector3 piece1Pos = piece1.Pos;
+				Quaternion piece1Rot = piece1.Rot;
+
+				int piece2X = piece2.X;
+				int piece2Y = piece2.Y;
+				Vector3 piece2Pos = piece2.Pos;
+				Quaternion piece2Rot = piece2.Rot;
+
+				StartCoroutine(SwapBack(piece1, piece2, piece1X, piece1Y, piece1Pos, piece1Rot, piece2X, piece2Y, piece2Pos, piece2Rot));
+
+				pieces[piece1X, piece1Y] = piece1;
+				pieces[piece2X, piece2Y] = piece2;
+			}
+
+			pressedPiece = null;
+
+		}
+	}
+
+	private IEnumerator SwapBack(GamePiece piece1, GamePiece piece2, int piece1X, int piece1Y, Vector3 piece1Pos, Quaternion piece1Rot, int piece2X, int piece2Y, Vector3 piece2Pos, Quaternion piece2Rot)
+	{ //swaps the pieces then swaps them back if they dont match
+		piece1.MovableComponent.Move(piece2X, piece2Y, piece2Pos, piece2Rot, fillTime);
+		piece2.MovableComponent.Move(piece1X, piece1Y, piece1Pos, piece1Rot, fillTime);
+
+		yield return new WaitForSeconds(fillTime * 1.5f);
+
+		piece1.MovableComponent.Move(piece1X, piece1Y, piece1Pos, piece1Rot, fillTime);
+		piece2.MovableComponent.Move(piece2X, piece2Y, piece2Pos, piece2Rot, fillTime);
+	}
+
+	public GamePiece whatIsPressed()
+	{
+		return pressedPiece;
+	}
+
+	public void PressedPiece(GamePiece piece)
+	{
+		pressedPiece = piece;
+	}
+
+	public void EnterPiece(GamePiece piece)
+	{
+		enteredPiece = piece;
+
+		if (IsAdjacent(pressedPiece, piece)) {
+			SwapPieces(pressedPiece, piece);
+		}
+	}
+
+	public List<GamePiece> GetMatch(GamePiece piece, int newX, int newY)
+	{
+		if (piece.IsColored()) {
+			ColorPiece.ColorType color = piece.ColorComponent.Color;
+			List<GamePiece> horizontalPieces = new List<GamePiece>();
+			List<GamePiece> verticalPieces = new List<GamePiece>();
+			List<GamePiece> matchingPieces = new List<GamePiece>();
+
+			//First check horizontally
+			horizontalPieces.Add(piece);
+
+			for (int dir = 0; dir <= 1; dir++) { //changes direction of traversal
+				for (int xOffset = 1; xOffset < totalRows; xOffset++) {
+					int x;
+
+					if (dir == 0) { //go left?
+						x = newX - xOffset;
+						if (x < 0) {
+							x = x + totalRows;
+						}
+					} else { //go Right?
+						x = newX + xOffset;
+						if (x >= totalRows) {
+							x = x - totalRows;
+						}
+					}
+
+					if (x == newX) {
+						break;
+					}
+
+					if (pieces[x, newY] != null) {
+						if (pieces[x, newY].IsColored() && pieces[x, newY].ColorComponent.Color == color) {
+							horizontalPieces.Add(pieces[x, newY]);
+						} else {
+							break;
+						}
+					}
+				}
+			}
+
+			if (horizontalPieces.Count >= 3) {
+				for (int i = 0; i < horizontalPieces.Count; i++) {
+					matchingPieces.Add(horizontalPieces[i]);
+				}
+			}
+
+			//Traverse vertically if we find a match to look for a L or T shape
+			if (horizontalPieces.Count >= 3) {
+				for (int i = 0; i < horizontalPieces.Count; i++) {
+					for (int dir = 0; dir <= 1; dir++) {
+						for (int yOffset = 1; yOffset < collumnHeight; yOffset++) {
+							int y;
+
+							if (dir == 0) { //UP
+								y = newY - yOffset;
+							} else { //Down
+								y = newY + yOffset;
+							}
+
+							if (y < 0 || y >= collumnHeight) {
+								break;
+							}
+
+							if (pieces[newX, y] != null) {
+								if (pieces[horizontalPieces[i].X, y].IsColored() && pieces[horizontalPieces[i].X, y].ColorComponent.Color == color) {
+									verticalPieces.Add(pieces[horizontalPieces[i].X, y]);
+								} else {
+									break;
+								}
+							}
+
+						}
+
+						if (verticalPieces.Count < 2) {
+							verticalPieces.Clear();
+						} else {
+							for (int j = 0; j < verticalPieces.Count; j++) {
+								matchingPieces.Add(verticalPieces[j]);
+							}
+
+							break;
+						}
+
+					}
+				}
+			}
+
+
+			if (matchingPieces.Count >= 3) {
+				return matchingPieces;
+			}
+
+			//Check Vertically
+			horizontalPieces.Clear();
+			verticalPieces.Clear();
+			verticalPieces.Add(piece);
+
+			for (int dir = 0; dir <= 1; dir++) { //changes direction of traversal
+				for (int yOffset = 1; yOffset < collumnHeight; yOffset++) {
+					int y;
+
+					if (dir == 0) { //go up?
+						y = newY - yOffset;
+					} else { //go down?
+						y = newY + yOffset;
+					}
+
+					if (y < 0 || y >= collumnHeight) {
+						break;
+					}
+
+					if (pieces[newX, y] != null) {
+						if (pieces[newX, y].IsColored() && pieces[newX, y].ColorComponent.Color == color) {
+							verticalPieces.Add(pieces[newX, y]);
+						} else {
+							break;
+						}
+					}
+
+				}
+			}
+
+			if (verticalPieces.Count >= 3) {
+				for (int i = 0; i < verticalPieces.Count; i++) {
+					matchingPieces.Add(verticalPieces[i]);
+				}
+			}
+
+			//Traverse horizontally if we find a match to look for a L or T shape
+			if (verticalPieces.Count >= 3) {
+				for (int i = 0; i < verticalPieces.Count; i++) {
+					for (int dir = 0; dir <= 1; dir++) {
+						for (int xOffset = 1; xOffset < totalRows; xOffset++) {
+							int x;
+
+							if (dir == 0) { //Left
+								x = newX - xOffset;
+								if (x < 0) {
+									x = x + totalRows;
+								}
+							} else { //Right
+								x = newX + xOffset;
+								if (x >= totalRows) {
+									x = x - totalRows;
+								}
+							}
+
+							if (x == newX) {
+								break;
+							}
+
+							if (pieces[x, newY] != null) {
+								if (pieces[x, verticalPieces[i].Y].IsColored() && pieces[x, verticalPieces[i].Y].ColorComponent.Color == color) {
+									horizontalPieces.Add(pieces[x, verticalPieces[i].Y]);
+								} else {
+									break;
+								}
+							}
+
+						}
+
+						if (horizontalPieces.Count < 2) {
+							horizontalPieces.Clear();
+						} else {
+							for (int j = 0; j < horizontalPieces.Count; j++) {
+								matchingPieces.Add(horizontalPieces[j]);
+							}
+
+							break;
+						}
+
+					}
+				}
+			}
+
+			if (matchingPieces.Count >= 3) {
+				return matchingPieces;
+			}
+
+		}
+
+		return null;
+
+	}
 
 }

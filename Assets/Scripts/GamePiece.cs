@@ -112,19 +112,17 @@ public class GamePiece : MonoBehaviour
 		Grid = _grid;
 		type = _type;
 	}
-	/*
+	
 
 	private void OnMouseEnter(){
-		Grid.EnterPiece(this);
-	}
-
-	private void OnMouseUp(){
-		Grid.ReleasePiece();
+		if (Grid.whatIsPressed() != this && Grid.whatIsPressed() != null) {
+			Grid.EnterPiece(this);
+		}
 	}
 
 	private void OnMouseDown(){
 		Grid.PressedPiece(this);
-	}*/
+	}
 
 	public bool IsMovable(){
 		return movableComponent != null;
