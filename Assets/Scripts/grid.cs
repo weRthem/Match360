@@ -41,7 +41,6 @@ public class grid : MonoBehaviour
 	private bool inverse = false;
 
 	private GamePiece pressedPiece;
-	private GamePiece enteredPiece;
 
 	int ang = 0;
 
@@ -126,9 +125,16 @@ public class grid : MonoBehaviour
 	}
 
 	public IEnumerator Fill(){
-		while (FillStep()) {
-			inverse = !inverse;
-			yield return new WaitForSeconds(fillTime);
+		bool needsRefill = true;
+
+		while (needsRefill) {
+			yield return new WaitForSeconds(fillTime * 2f);
+
+			while (FillStep()) {
+				inverse = !inverse;
+				yield return new WaitForSeconds(fillTime);
+			}
+			needsRefill = ClearAllValidMatches();
 		}
 	}
 
@@ -233,38 +239,44 @@ public class grid : MonoBehaviour
 
 	public void SwapPieces(GamePiece piece1, GamePiece piece2)
 	{
-		if (piece1.IsMovable() && piece2.IsMovable()) {
-			pieces[piece1.X, piece1.Y] = piece2;
-			pieces[piece2.X, piece2.Y] = piece1;
+		if (piece1 != null && piece2 != null) {
+			if (piece1.IsMovable() && piece2.IsMovable()) {
+				pieces[piece1.X, piece1.Y] = piece2;
+				pieces[piece2.X, piece2.Y] = piece1;
 
-			if (GetMatch(piece1, piece2.X, piece2.Y) != null || GetMatch(piece2, piece1.X, piece1.Y) != null) {
-				int piece1X = piece1.X;
-				int piece1Y = piece1.Y;
-				Vector3 piece1Pos = piece1.Pos;
-				Quaternion piece1Rot = piece1.Rot;
+				if (GetMatch(piece1, piece2.X, piece2.Y) != null || GetMatch(piece2, piece1.X, piece1.Y) != null) {
+					int piece1X = piece1.X;
+					int piece1Y = piece1.Y;
+					Vector3 piece1Pos = piece1.Pos;
+					Quaternion piece1Rot = piece1.Rot;
 
-				piece1.MovableComponent.Move(piece2.X, piece2.Y, piece2.Pos, piece2.Rot, fillTime);
-				piece2.MovableComponent.Move(piece1X, piece1Y, piece1Pos, piece1Rot, fillTime);
+					piece1.MovableComponent.Move(piece2.X, piece2.Y, piece2.Pos, piece2.Rot, fillTime);
+					piece2.MovableComponent.Move(piece1X, piece1Y, piece1Pos, piece1Rot, fillTime);
 
-			} else {
-				int piece1X = piece1.X;
-				int piece1Y = piece1.Y;
-				Vector3 piece1Pos = piece1.Pos;
-				Quaternion piece1Rot = piece1.Rot;
+					ClearAllValidMatches();
 
-				int piece2X = piece2.X;
-				int piece2Y = piece2.Y;
-				Vector3 piece2Pos = piece2.Pos;
-				Quaternion piece2Rot = piece2.Rot;
+					StartCoroutine(Fill());
 
-				StartCoroutine(SwapBack(piece1, piece2, piece1X, piece1Y, piece1Pos, piece1Rot, piece2X, piece2Y, piece2Pos, piece2Rot));
+				}/* else {
+					int piece1X = piece1.X;
+					int piece1Y = piece1.Y;
+					Vector3 piece1Pos = piece1.Pos;
+					Quaternion piece1Rot = piece1.Rot;
 
-				pieces[piece1X, piece1Y] = piece1;
-				pieces[piece2X, piece2Y] = piece2;
+					int piece2X = piece2.X;
+					int piece2Y = piece2.Y;
+					Vector3 piece2Pos = piece2.Pos;
+					Quaternion piece2Rot = piece2.Rot;
+
+					StartCoroutine(SwapBack(piece1, piece2, piece1X, piece1Y, piece1Pos, piece1Rot, piece2X, piece2Y, piece2Pos, piece2Rot));
+
+					pieces[piece1X, piece1Y] = piece1;
+					pieces[piece2X, piece2Y] = piece2;
+				}*/
+
+				pressedPiece = null;
+
 			}
-
-			pressedPiece = null;
-
 		}
 	}
 
@@ -289,9 +301,7 @@ public class grid : MonoBehaviour
 		pressedPiece = piece;
 	}
 
-	public void EnterPiece(GamePiece piece)
-	{
-		enteredPiece = piece;
+	public void EnterPiece(GamePiece piece){
 
 		if (IsAdjacent(pressedPiece, piece)) {
 			SwapPieces(pressedPiece, piece);
@@ -362,7 +372,7 @@ public class grid : MonoBehaviour
 								break;
 							}
 
-							if (pieces[newX, y] != null) {
+							if (pieces[horizontalPieces[i].X, y] != null) {
 								if (pieces[horizontalPieces[i].X, y].IsColored() && pieces[horizontalPieces[i].X, y].ColorComponent.Color == color) {
 									verticalPieces.Add(pieces[horizontalPieces[i].X, y]);
 								} else {
@@ -450,7 +460,7 @@ public class grid : MonoBehaviour
 								break;
 							}
 
-							if (pieces[x, newY] != null) {
+							if (pieces[x, verticalPieces[i].Y] != null) {
 								if (pieces[x, verticalPieces[i].Y].IsColored() && pieces[x, verticalPieces[i].Y].ColorComponent.Color == color) {
 									horizontalPieces.Add(pieces[x, verticalPieces[i].Y]);
 								} else {
@@ -482,6 +492,42 @@ public class grid : MonoBehaviour
 
 		return null;
 
+	}
+
+	public bool ClearAllValidMatches(){
+		bool needsRefill = false;
+
+		for (int y = 0; y < collumnHeight; y++) {
+			for (int x = 0; x < totalRows; x++) {
+				if (pieces[x, y] != null) {
+					if (pieces[x, y].IsClearable()) {
+						List<GamePiece> match = GetMatch(pieces[x, y], x, y);
+
+						if (match != null) {
+							for (int i = 0; i < match.Count; i++) {
+								if (ClearPiece(match[i].X, match[i].Y)) {
+									needsRefill = true;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return needsRefill;
+	}
+
+	public bool ClearPiece(int x, int y){
+		if (pieces[x, y] != null) {
+			if (pieces[x, y].IsClearable() && !pieces[x, y].ClearableComponent.IsBeingCleared) {
+				pieces[x, y].ClearableComponent.Clear();
+				pieces[x, y] = null;
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 }

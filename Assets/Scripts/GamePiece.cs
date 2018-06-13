@@ -6,6 +6,7 @@ public class GamePiece : MonoBehaviour
 {
 	private Vector3 pos;
 	private Quaternion rot;
+	//may need to make serializable to find problem with doubling up on pieces
 	private int x;
 	private int y;
 
@@ -133,9 +134,9 @@ public class GamePiece : MonoBehaviour
 		return colorComponent != null;
 	}
 
-	/*
+	
 	public bool IsClearable()
 	{
 		return clearableComponent != null;
-	}*/
+	}
 }
