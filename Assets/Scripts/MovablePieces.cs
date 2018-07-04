@@ -8,6 +8,8 @@ public class MovablePieces : MonoBehaviour
 	private GamePiece piece;
 	private IEnumerator moveCoroutine;
 
+	public bool isMoving = false;
+
 	void Awake()
 	{
 		piece = GetComponent<GamePiece>();
@@ -28,6 +30,7 @@ public class MovablePieces : MonoBehaviour
 	public void Move(int newX, int newY, Vector3 newPos, Quaternion newRot, float time){
 
 		if (moveCoroutine != null) {
+			isMoving = true;
 			StopCoroutine(moveCoroutine);
 		}
 		moveCoroutine = MoveCoroutine(newX, newY, newPos, newRot, time);
@@ -51,6 +54,7 @@ public class MovablePieces : MonoBehaviour
 
 		piece.transform.localPosition = newPos;
 		piece.transform.localRotation = newRot;
+		isMoving = false;
 	}
 }
 

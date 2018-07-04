@@ -7,8 +7,8 @@ public class GamePiece : MonoBehaviour
 	private Vector3 pos;
 	private Quaternion rot;
 	//may need to make serializable to find problem with doubling up on pieces
-	private int x;
-	private int y;
+	[SerializeField] int x;
+	[SerializeField] int y;
 
 	public Vector3 Pos //allows other scripts to access the pieces location
 	{
@@ -113,16 +113,21 @@ public class GamePiece : MonoBehaviour
 		Grid = _grid;
 		type = _type;
 	}
-	
 
-	private void OnMouseEnter(){
-		if (Grid.whatIsPressed() != this && Grid.whatIsPressed() != null) {
-			Grid.EnterPiece(this);
+
+	private void OnMouseEnter() {
+		if (Grid.whatIsPressed() != null) { 
+			if (!(Grid.whatIsPressed().X != X && Grid.whatIsPressed().Y != Y) && Grid.whatIsPressed().type != grid.PieceType.EMPTY) {
+				Debug.Log("Piece: " + colorComponent.Color + " X: " + X + " Y:" + Y + " IsMovable? " + IsMovable());
+				Grid.EnterPiece(this);
+			}
 		}
 	}
 
 	private void OnMouseDown(){
-		Grid.PressedPiece(this);
+		if (this.type != grid.PieceType.EMPTY) {
+			Grid.PressedPiece(this);
+		}
 	}
 
 	public bool IsMovable(){
