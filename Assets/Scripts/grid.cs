@@ -242,60 +242,63 @@ public class grid : MonoBehaviour
 			Vector3 piece2Pos = piece2.Pos;
 			Quaternion piece2Rot = piece2.Rot;
 
-			piece1.MovableComponent.Move(piece2X, piece2Y, piece2Pos, piece2Rot, fillTime);
-			piece2.MovableComponent.Move(piece1X, piece1Y, piece1Pos, piece1Rot, fillTime);
+			if (piece1.Type == PieceType.ANY && piece1.IsClearable() && piece2.IsColored()) {
+				ClearColorPiece clearColor = piece1.GetComponent<ClearColorPiece>();
 
-			if (piece1.X == piece2X && piece2.X == piece1X && piece1.Y == piece2Y && piece2.Y == piece1Y) {
-				pieces[piece1X, piece1Y] = piece2;
-				pieces[piece2X, piece2Y] = piece1;
-				if (GetMatch(piece1, piece2X, piece2Y) != null || GetMatch(piece2, piece1X, piece1Y) != null
-					|| piece1.Type == PieceType.ANY || piece2.Type == PieceType.ANY) {
-
-					if (piece1.Type == PieceType.ANY && piece1.IsClearable() && piece2.IsColored()) {
-						ClearColorPiece clearColor = piece1.GetComponent<ClearColorPiece>();
-
-						if (clearColor) {
-							clearColor.Color = piece2.ColorComponent.Color;
-						}
-
-						ClearPiece(piece1.X, piece1.Y);
-					}
-
-					if (piece2.Type == PieceType.ANY && piece2.IsClearable() && piece1.IsColored()) {
-						ClearColorPiece clearColor = piece2.GetComponent<ClearColorPiece>();
-
-						if (clearColor) {
-							clearColor.Color = piece1.ColorComponent.Color;
-						}
-
-						ClearPiece(piece1.X, piece1.Y);
-					}
-
-					ClearAllValidMatches();
-
-					if (piece1.Type == PieceType.COLLUMN_CLEAR || piece1.Type == PieceType.ROW_CLEAR) {
-						ClearPiece(piece1X, piece1Y);
-					}
-
-					if (piece2.Type == PieceType.COLLUMN_CLEAR || piece2.Type == PieceType.ROW_CLEAR) {
-						ClearPiece(piece2X, piece2Y);
-					}
-
-
-					pressedPiece = null;
-					enteredPiece = null;
-
-					StartCoroutine(Fill());
-				} else {
-					StartCoroutine(SwapBack(piece1, piece2, piece1X, piece1Y, piece1Pos, piece1Rot, piece2X, piece2Y, piece2Pos, piece2Rot));
-					pressedPiece = null;
-					enteredPiece = null;
-					pieces[piece1X, piece1Y] = piece1;
-					pieces[piece2X, piece2Y] = piece2;
+				if (clearColor) {
+					clearColor.Color = piece2.ColorComponent.Color;
 				}
+
+				ClearPiece(piece1.X, piece1.Y);
+				StartCoroutine(Fill());
+			} else if (piece2.Type == PieceType.ANY && piece2.IsClearable() && piece1.IsColored()) {
+				ClearColorPiece clearColor = piece2.GetComponent<ClearColorPiece>();
+
+				if (clearColor) {
+					clearColor.Color = piece1.ColorComponent.Color;
+				}
+
+				ClearPiece(piece2.X, piece2.Y);
+				StartCoroutine(Fill());
 			} else {
-				Debug.LogError("Piece1: " + piece1.X + " " + piece1.Y);
-				Debug.LogError("Piece2: " + piece2.X + " " + piece2.Y);
+
+				piece1.MovableComponent.Move(piece2X, piece2Y, piece2Pos, piece2Rot, fillTime);
+				piece2.MovableComponent.Move(piece1X, piece1Y, piece1Pos, piece1Rot, fillTime);
+
+
+				if (piece1.X == piece2X && piece2.X == piece1X && piece1.Y == piece2Y && piece2.Y == piece1Y) {
+					pieces[piece1X, piece1Y] = piece2;
+					pieces[piece2X, piece2Y] = piece1;
+					if (GetMatch(piece1, piece2X, piece2Y) != null || GetMatch(piece2, piece1X, piece1Y) != null
+						|| piece1.Type == PieceType.ANY || piece2.Type == PieceType.ANY) {
+
+						ClearAllValidMatches();
+
+						if (piece1.Type == PieceType.COLLUMN_CLEAR || piece1.Type == PieceType.ROW_CLEAR) {
+							ClearPiece(piece1X, piece1Y);
+						}
+
+						if (piece2.Type == PieceType.COLLUMN_CLEAR || piece2.Type == PieceType.ROW_CLEAR) {
+							ClearPiece(piece2X, piece2Y);
+						}
+
+
+						pressedPiece = null;
+						enteredPiece = null;
+
+						StartCoroutine(Fill());
+					} else {
+						StartCoroutine(SwapBack(piece1, piece2, piece1X, piece1Y, piece1Pos, piece1Rot, piece2X, piece2Y, piece2Pos, piece2Rot));
+						pressedPiece = null;
+						enteredPiece = null;
+						pieces[piece1X, piece1Y] = piece1;
+						pieces[piece2X, piece2Y] = piece2;
+					}
+				} else {
+					Debug.LogError("Piece1: " + piece1.X + " " + piece1.Y);
+					Debug.LogError("Piece2: " + piece2.X + " " + piece2.Y);
+				}
+
 			}
 
 		}
