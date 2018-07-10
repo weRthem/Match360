@@ -242,6 +242,7 @@ public class grid : MonoBehaviour
 			Vector3 piece2Pos = piece2.Pos;
 			Quaternion piece2Rot = piece2.Rot;
 
+			//Checks if Piece 1 is a hyper cube
 			if (piece1.Type == PieceType.ANY && piece1.IsClearable() && piece2.IsColored()) {
 				ClearColorPiece clearColor = piece1.GetComponent<ClearColorPiece>();
 
@@ -251,6 +252,7 @@ public class grid : MonoBehaviour
 
 				ClearPiece(piece1.X, piece1.Y);
 				StartCoroutine(Fill());
+			//Checks if piece 2 is a hyper cube
 			} else if (piece2.Type == PieceType.ANY && piece2.IsClearable() && piece1.IsColored()) {
 				ClearColorPiece clearColor = piece2.GetComponent<ClearColorPiece>();
 
@@ -260,6 +262,7 @@ public class grid : MonoBehaviour
 
 				ClearPiece(piece2.X, piece2.Y);
 				StartCoroutine(Fill());
+			//if there are no hyper cubes finish checking for a match
 			} else {
 
 				piece1.MovableComponent.Move(piece2X, piece2Y, piece2Pos, piece2Rot, fillTime);
@@ -272,7 +275,8 @@ public class grid : MonoBehaviour
 					if (GetMatch(piece1, piece2X, piece2Y) != null || GetMatch(piece2, piece1X, piece1Y) != null
 						|| piece1.Type == PieceType.ANY || piece2.Type == PieceType.ANY) {
 
-						ClearAllValidMatches();
+						ClearSwappedMatches(piece1X, piece1Y);
+						ClearSwappedMatches(piece2X, piece2Y);
 
 						if (piece1.Type == PieceType.COLLUMN_CLEAR || piece1.Type == PieceType.ROW_CLEAR) {
 							ClearPiece(piece1X, piece1Y);
@@ -486,6 +490,7 @@ public class grid : MonoBehaviour
 			}
 
 			//Traverse horizontally if we find a match to look for a L or T shape
+			//bug in here somewhere that dosent find the upright "T" as a match
 			if (verticalPieces.Count >= 3) {
 				for (int i = 0; i < verticalPieces.Count; i++) {
 					for (int dir = 0; dir <= 1; dir++) {
@@ -509,7 +514,7 @@ public class grid : MonoBehaviour
 							}
 
 							if (pieces[x, verticalPieces[i].Y] != null) {
-								if (pieces[x, verticalPieces[i].Y].IsColored() && pieces[x, verticalPieces[i].Y].ColorComponent.Color == color) {
+								if (pieces[x, verticalPieces[i].Y].ColorComponent.Color == color) {
 									horizontalPieces.Add(pieces[x, verticalPieces[i].Y]);
 								} else {
 									break;
@@ -524,7 +529,6 @@ public class grid : MonoBehaviour
 							for (int j = 0; j < horizontalPieces.Count; j++) {
 								matchingPieces.Add(horizontalPieces[j]);
 							}
-
 							break;
 						}
 
@@ -544,72 +548,133 @@ public class grid : MonoBehaviour
 
 	public bool ClearAllValidMatches(){
 		bool needsRefill = false;
-
 		for (int y = 0; y < collumnHeight; y++) {
 			for (int x = 0; x < totalRows; x++) {
-				if (pieces[x, y] != null) {
-					if (pieces[x, y].IsClearable()) {
-						List<GamePiece> match = GetMatch(pieces[x, y], x, y);
-						if (match != null) {
-							PieceType specialPieceType = PieceType.COUNT;
-							GamePiece randomPiece = match[Random.Range(0, match.Count)];
-							int specialPieceX = randomPiece.X;
-							int specialPieceY = randomPiece.Y;
-							Vector3 specialPiecePos = randomPiece.Pos;
-							Quaternion specialPieceRot = randomPiece.Rot;
+				if (pieces[x, y] == null) {
+					break;
+				}
+				if (pieces[x, y].IsClearable()) {
+					List<GamePiece> match = GetMatch(pieces[x, y], x, y);
+					if (match != null) {
+						PieceType specialPieceType = PieceType.COUNT;
+						GamePiece randomPiece = match[Random.Range(0, match.Count)];
+						int specialPieceX = randomPiece.X;
+						int specialPieceY = randomPiece.Y;
+						Vector3 specialPiecePos = randomPiece.Pos;
+						Quaternion specialPieceRot = randomPiece.Rot;
 
-							if (match.Count == 4) {
-								if (pressedPiece == null || enteredPiece == null) {
-									specialPieceType = (PieceType)Random.Range((int)PieceType.ROW_CLEAR, (int)PieceType.COLLUMN_CLEAR); //casts the piece types to a int then chooses randomly between them
-								} else if (pressedPiece.Y == enteredPiece.Y) {
-									specialPieceType = PieceType.ROW_CLEAR;
-								} else {
-									specialPieceType = PieceType.COLLUMN_CLEAR;
-								}
-							} else if (match.Count >= 5) {
-								specialPieceType = PieceType.ANY;
+						if (match.Count == 4) {
+							if (pressedPiece == null || enteredPiece == null) {
+								specialPieceType = (PieceType)Random.Range((int)PieceType.ROW_CLEAR, (int)PieceType.COLLUMN_CLEAR); //casts the piece types to a int then chooses randomly between them
+							} else if (pressedPiece.Y == enteredPiece.Y) {
+								specialPieceType = PieceType.ROW_CLEAR;
+							} else {
+								specialPieceType = PieceType.COLLUMN_CLEAR;
 							}
-
-
-							for (int i = 0; i < match.Count; i++) {
-
-								if (ClearPiece(match[i].X, match[i].Y)) {
-									needsRefill = true;
-
-									if (match[i] == pressedPiece || match[i] == enteredPiece) {
-										specialPieceX = match[i].X;
-										specialPieceY = match[i].Y;
-										specialPiecePos = match[i].Pos;
-										specialPieceRot = match[i].Rot;
-									}
-
-									if (pieces[match[i].X, match[i].Y] != null) {
-										pieces[match[i].X, match[i].Y] = null;
-									}
-								}
-							}
-
-							if (specialPieceType != PieceType.COUNT) {
-								//Destroy(pieces[specialPieceX, specialPieceY]);
-								GamePiece newPiece = SpawnNewPiece(specialPieceX, specialPieceY, specialPiecePos, specialPieceRot, specialPieceType);
-
-								if ((specialPieceType == PieceType.ROW_CLEAR || specialPieceType == PieceType.COLLUMN_CLEAR)
-									&& newPiece.IsColored() && match[0].IsColored()) {
-									newPiece.ColorComponent.SetColor(match[0].ColorComponent.Color);
-								} else if (specialPieceType == PieceType.ANY && newPiece.IsColored()) {
-									newPiece.ColorComponent.SetColor(ColorPiece.ColorType.ANY);
-								}
-							}
-
-
+						} else if (match.Count >= 5) {
+							specialPieceType = PieceType.ANY;
 						}
 
+
+						for (int i = 0; i < match.Count; i++) {
+
+							if (ClearPiece(match[i].X, match[i].Y)) {
+								needsRefill = true;
+
+								if (match[i] == pressedPiece || match[i] == enteredPiece) {
+									specialPieceX = match[i].X;
+									specialPieceY = match[i].Y;
+									specialPiecePos = match[i].Pos;
+									specialPieceRot = match[i].Rot;
+								}
+
+								if (pieces[match[i].X, match[i].Y] != null) {
+									pieces[match[i].X, match[i].Y] = null;
+								}
+							}
+						}
+
+						if (specialPieceType != PieceType.COUNT) {
+							//Destroy(pieces[specialPieceX, specialPieceY]);
+							GamePiece newPiece = SpawnNewPiece(specialPieceX, specialPieceY, specialPiecePos, specialPieceRot, specialPieceType);
+
+							if ((specialPieceType == PieceType.ROW_CLEAR || specialPieceType == PieceType.COLLUMN_CLEAR)
+								&& newPiece.IsColored() && match[0].IsColored()) {
+								newPiece.ColorComponent.SetColor(match[0].ColorComponent.Color);
+							} else if (specialPieceType == PieceType.ANY && newPiece.IsColored()) {
+								newPiece.ColorComponent.SetColor(ColorPiece.ColorType.ANY);
+							}
+						}
+
+
 					}
+
 				}
+
 			}
 		}
 
 		return needsRefill;
+	}
+
+	public void ClearSwappedMatches(int x, int y) {
+		if (pieces[x, y].IsClearable()) {
+			List<GamePiece> match = GetMatch(pieces[x, y], x, y);
+			if (match != null) {
+				PieceType specialPieceType = PieceType.COUNT;
+				GamePiece randomPiece = match[Random.Range(0, match.Count)];
+				int specialPieceX = randomPiece.X;
+				int specialPieceY = randomPiece.Y;
+				Vector3 specialPiecePos = randomPiece.Pos;
+				Quaternion specialPieceRot = randomPiece.Rot;
+
+				if (match.Count == 4) {
+					if (pressedPiece == null || enteredPiece == null) {
+						specialPieceType = (PieceType)Random.Range((int)PieceType.ROW_CLEAR, (int)PieceType.COLLUMN_CLEAR); //casts the piece types to a int then chooses randomly between them
+					} else if (pressedPiece.Y == enteredPiece.Y) {
+						specialPieceType = PieceType.ROW_CLEAR;
+					} else {
+						specialPieceType = PieceType.COLLUMN_CLEAR;
+					}
+				} else if (match.Count >= 5) {
+					specialPieceType = PieceType.ANY;
+				}
+
+
+				for (int i = 0; i < match.Count; i++) {
+
+					if (ClearPiece(match[i].X, match[i].Y)) {
+						//needsRefill = true;
+
+						if (match[i] == pressedPiece || match[i] == enteredPiece) {
+							specialPieceX = match[i].X;
+							specialPieceY = match[i].Y;
+							specialPiecePos = match[i].Pos;
+							specialPieceRot = match[i].Rot;
+						}
+
+						if (pieces[match[i].X, match[i].Y] != null) {
+							pieces[match[i].X, match[i].Y] = null;
+						}
+					}
+				}
+
+				if (specialPieceType != PieceType.COUNT) {
+					//Destroy(pieces[specialPieceX, specialPieceY]);
+					GamePiece newPiece = SpawnNewPiece(specialPieceX, specialPieceY, specialPiecePos, specialPieceRot, specialPieceType);
+
+					if ((specialPieceType == PieceType.ROW_CLEAR || specialPieceType == PieceType.COLLUMN_CLEAR)
+						&& newPiece.IsColored() && match[0].IsColored()) {
+						newPiece.ColorComponent.SetColor(match[0].ColorComponent.Color);
+					} else if (specialPieceType == PieceType.ANY && newPiece.IsColored()) {
+						newPiece.ColorComponent.SetColor(ColorPiece.ColorType.ANY);
+					}
+				}
+
+
+			}
+
+		}
 	}
 
 	public bool ClearPiece(int x, int y){
