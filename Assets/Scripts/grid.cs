@@ -434,16 +434,16 @@ public class grid : MonoBehaviour
 
 						}
 
-						if (verticalPieces.Count < 2) {
-							verticalPieces.Clear();
-						} else {
-							for (int j = 0; j < verticalPieces.Count; j++) {
-								matchingPieces.Add(verticalPieces[j]);
-							}
+					}
 
-							break;
+					if (verticalPieces.Count < 2) {
+						verticalPieces.Clear();
+					} else {
+						for (int j = 0; j < verticalPieces.Count; j++) {
+							matchingPieces.Add(verticalPieces[j]);
 						}
 
+						break;
 					}
 				}
 			}
@@ -523,15 +523,15 @@ public class grid : MonoBehaviour
 
 						}
 
-						if (horizontalPieces.Count < 2) {
-							horizontalPieces.Clear();
-						} else {
-							for (int j = 0; j < horizontalPieces.Count; j++) {
-								matchingPieces.Add(horizontalPieces[j]);
-							}
-							break;
-						}
+					}
 
+					if (horizontalPieces.Count < 2) {
+						horizontalPieces.Clear();
+					} else {
+						for (int j = 0; j < horizontalPieces.Count; j++) {
+							matchingPieces.Add(horizontalPieces[j]);
+						}
+						break;
 					}
 				}
 			}
