@@ -126,7 +126,6 @@ public class grid : MonoBehaviour
 			needsRefill = ClearAllValidMatches();
 		}
 
-		CheckIfCorrectSpot();
 	}
 
 	public bool FillStep()
@@ -242,6 +241,8 @@ public class grid : MonoBehaviour
 			Vector3 piece2Pos = piece2.Pos;
 			Quaternion piece2Rot = piece2.Rot;
 
+			Debug.Log("count");
+
 			//Checks if Piece 1 is a hyper cube
 			if (piece1.Type == PieceType.ANY && piece1.IsClearable() && piece2.IsColored()) {
 				ClearColorPiece clearColor = piece1.GetComponent<ClearColorPiece>();
@@ -319,28 +320,6 @@ public class grid : MonoBehaviour
 		piece1.MovableComponent.Move(piece1X, piece1Y, piece1Pos, piece1Rot, fillTime);
 		piece2.MovableComponent.Move(piece2X, piece2Y, piece2Pos, piece2Rot, fillTime);
 
-		CheckIfCorrectSpot();
-	}
-
-	void CheckIfCorrectSpot() {
-		for (int x = 0; x < totalRows; x++) {
-			for (int y = 0; y < collumnHeight; y++) {
-				if (pieces[x, y] != null) {
-					if (emptyPieces[x, y].X != pieces[x, y].X) {
-						Debug.Log("piece [" + x + ", " + y + "] X does not match");
-					} else if (emptyPieces[x, y].Y != pieces[x, y].Y) {
-						Debug.Log("piece [" + x + ", " + y + "] Y does not match");
-					} else if (emptyPieces[x, y].Pos != pieces[x, y].Pos) {
-						Debug.Log("piece [" + x + ", " + y + "] Pos does not match");
-					} else if (emptyPieces[x, y].Rot != pieces[x, y].Rot) {
-						Debug.Log("piece [" + x + ", " + y + "] Rot does not match");
-					} else {
-						Debug.Log("all g");
-					}
-
-				}
-			}
-		}
 	}
 
 	public GamePiece whatIsPressed()
@@ -691,8 +670,7 @@ public class grid : MonoBehaviour
 		return false;
 	}
 
-	public void ClearRow(int row)
-	{
+	public void ClearRow(int row){
 		for (int x = 0; x < totalRows; x++) {
 			ClearPiece(x, row);
 		}
@@ -707,6 +685,16 @@ public class grid : MonoBehaviour
 
 	public void ClearColor(ColorPiece.ColorType color)
 	{
+		if (color == ColorPiece.ColorType.COUNT) {
+			for (int x = 0; x < totalRows; x++) {
+				if (pieces[x, collumnHeight - 1] != null) {
+					color = (ColorPiece.ColorType)Random.Range(0, pieces[x, collumnHeight - 1].ColorComponent.NumColor);
+					Debug.Log("grid color: " + color);
+					break;
+				}
+			}
+		}
+
 		for (int x = 0; x < totalRows; x++) {
 			for (int y = 0; y < collumnHeight; y++) {
 				if (pieces[x, y] != null) {

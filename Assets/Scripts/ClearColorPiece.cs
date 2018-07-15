@@ -16,7 +16,7 @@ public class ClearColorPiece : Clearable
 	// Use this for initialization
 	void Start()
 	{
-
+		color = ColorPiece.ColorType.COUNT;
 	}
 
 	// Update is called once per frame
@@ -25,9 +25,9 @@ public class ClearColorPiece : Clearable
 
 	}
 
-	public override void Clear()
-	{
+	public override void Clear(){
 		base.Clear();
+		Debug.Log(color);
 		piece.GridRef.ClearColor(color);
 	}
 	

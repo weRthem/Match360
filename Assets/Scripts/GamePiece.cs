@@ -118,7 +118,6 @@ public class GamePiece : MonoBehaviour
 	private void OnMouseEnter() {
 		if (Grid.whatIsPressed() != null) { 
 			if (!(Grid.whatIsPressed().X != X && Grid.whatIsPressed().Y != Y) && Grid.whatIsPressed().type != grid.PieceType.EMPTY) {
-				Debug.Log("Piece: " + colorComponent.Color + " X: " + X + " Y:" + Y + " IsMovable? " + IsMovable());
 				Grid.EnterPiece(this);
 			}
 		}
