@@ -1,5 +1,6 @@
 3D match 3 known Bug list: aprox 200 moves in (do 5x !IMPORTANT! bug free before satisfied)
 
+*FIXED* 
 1. normal animation on row and collumn clear pieces plays for aprox 1s after destruction (no clue) 
 
 2.if you match pieces too quickly some do not swap back to original pos causing a "double piece" (will attempt to fix when vr support is added) !IMPORTANT!
@@ -7,8 +8,9 @@
 
 3D match 3 Quality of life fixes:
 
+*FIXED*
 1. make it so pieces only fall once the animation for destroyed pieces has finished (will fix once 3D moddels are in since i may handel thos animations differently)
-
+*FIXED*
 2. matched are made some times before the pieces fall to the proper position (look for matches only once the pieces have all finished falling)
 
 3. slow down the piece swapping speed (maybe?)
