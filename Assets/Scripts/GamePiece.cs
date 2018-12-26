@@ -124,7 +124,7 @@ public class GamePiece : MonoBehaviour
 	}
 
 	private void OnMouseDown(){
-		if (this.type != grid.PieceType.EMPTY) {
+		if (this.IsColored()) {
 			Grid.PressedPiece(this);
 		}
 	}

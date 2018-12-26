@@ -265,17 +265,13 @@ public class grid : MonoBehaviour
 				StartCoroutine(Fill());
 			//if there are no hyper cubes finish checking for a match
 			} else {
-
-				piece1.MovableComponent.Move(piece2X, piece2Y, piece2Pos, piece2Rot, fillTime);
-				piece2.MovableComponent.Move(piece1X, piece1Y, piece1Pos, piece1Rot, fillTime);
-
-
-				if (piece1.X == piece2X && piece2.X == piece1X && piece1.Y == piece2Y && piece2.Y == piece1Y) {
 					pieces[piece1X, piece1Y] = piece2;
 					pieces[piece2X, piece2Y] = piece1;
 					if (GetMatch(piece1, piece2X, piece2Y) != null || GetMatch(piece2, piece1X, piece1Y) != null
 						|| piece1.Type == PieceType.ANY || piece2.Type == PieceType.ANY) {
-
+						piece1.MovableComponent.Move(piece2X, piece2Y, piece2Pos, piece2Rot, fillTime);
+						piece2.MovableComponent.Move(piece1X, piece1Y, piece1Pos, piece1Rot, fillTime);
+						//Clear swapped pieced
 						ClearSwappedMatches(piece1X, piece1Y);
 						ClearSwappedMatches(piece2X, piece2Y);
 
@@ -293,16 +289,15 @@ public class grid : MonoBehaviour
 
 						StartCoroutine(Fill());
 					} else {
-						StartCoroutine(SwapBack(piece1, piece2, piece1X, piece1Y, piece1Pos, piece1Rot, piece2X, piece2Y, piece2Pos, piece2Rot));
+					//StartCoroutine(SwapBack(piece1, piece2, piece1X, piece1Y, piece1Pos, piece1Rot, piece2X, piece2Y, piece2Pos, piece2Rot));
+						piece1.MovableComponent.MoveBack(piece2X, piece2Y, piece2Pos, piece2Rot, fillTime);
+						piece2.MovableComponent.MoveBack(piece1X, piece1Y, piece1Pos, piece1Rot, fillTime);
 						pressedPiece = null;
 						enteredPiece = null;
 						pieces[piece1X, piece1Y] = piece1;
 						pieces[piece2X, piece2Y] = piece2;
 					}
-				} else {
-					Debug.LogError("Piece1: " + piece1.X + " " + piece1.Y);
-					Debug.LogError("Piece2: " + piece2.X + " " + piece2.Y);
-				}
+				
 
 			}
 
@@ -310,7 +305,7 @@ public class grid : MonoBehaviour
 			pressedPiece = null;
 	}
 
-	private IEnumerator SwapBack(GamePiece piece1, GamePiece piece2, int piece1X, int piece1Y, Vector3 piece1Pos, Quaternion piece1Rot, int piece2X, int piece2Y, Vector3 piece2Pos, Quaternion piece2Rot)
+	/*private IEnumerator SwapBack(GamePiece piece1, GamePiece piece2, int piece1X, int piece1Y, Vector3 piece1Pos, Quaternion piece1Rot, int piece2X, int piece2Y, Vector3 piece2Pos, Quaternion piece2Rot)
 	{ //swaps the pieces then swaps them back if they dont match
 		piece1.MovableComponent.Move(piece2X, piece2Y, piece2Pos, piece2Rot, fillTime);
 		piece2.MovableComponent.Move(piece1X, piece1Y, piece1Pos, piece1Rot, fillTime);
@@ -320,7 +315,7 @@ public class grid : MonoBehaviour
 		piece1.MovableComponent.Move(piece1X, piece1Y, piece1Pos, piece1Rot, fillTime);
 		piece2.MovableComponent.Move(piece2X, piece2Y, piece2Pos, piece2Rot, fillTime);
 
-	}
+	}*/
 
 	public GamePiece whatIsPressed()
 	{
